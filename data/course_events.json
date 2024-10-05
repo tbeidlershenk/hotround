@@ -1,0 +1,539 @@
+{
+    "22_Birdwalk": {
+        "events": []
+    },
+    "4_Wing_Campground": {
+        "events": []
+    },
+    "Alexander_Hamilton_Park": {
+        "events": []
+    },
+    "Anderson_Park_AB": {
+        "events": []
+    },
+    "Aperture_Park": {
+        "events": [
+            78686,
+            79178,
+            77161,
+            68714,
+            66784,
+            61939,
+            57344,
+            53371
+        ]
+    },
+    "Aspen_Meadows": {
+        "events": [
+            75977,
+            64846,
+            57282,
+            52921,
+            45484
+        ]
+    },
+    "Badlands_DGC": {
+        "events": [
+            80044,
+            68233
+        ]
+    },
+    "Baileys_Crossing_Disc_Golf_Course": {
+        "events": [
+            79246,
+            67125,
+            57998
+        ]
+    },
+    "Baker_Park_AB": {
+        "events": [
+            85818,
+            75035
+        ]
+    },
+    "Barrett_Park": {
+        "events": [
+            60896,
+            46742
+        ]
+    },
+    "Bear_Lake_Open": {
+        "events": []
+    },
+    "bear-paw-par-3-12330": {
+        "events": []
+    },
+    "Bonavista_Downs_Community": {
+        "events": [
+            85626
+        ]
+    },
+    "Bud_Miller_Park": {
+        "events": []
+    },
+    "Canmore_Nordic_Centre": {
+        "events": [
+            80412,
+            68822,
+            58548,
+            56362
+        ]
+    },
+    "Carstairs_Golf_Course": {
+        "events": []
+    },
+    "Centenary_Park": {
+        "events": []
+    },
+    "Central_Park_AB": {
+        "events": []
+    },
+    "Cochrane_Riverfront_Park": {
+        "events": []
+    },
+    "Currie_Reservior": {
+        "events": [
+            79061,
+            81872,
+            78841,
+            77627,
+            67813,
+            67007
+        ]
+    },
+    "David_Richardsson_Memorial_Disc_Golf_Course": {
+        "events": [
+            81872
+        ]
+    },
+    "dinosaur-downs-disc-golf-course-12603": {
+        "events": []
+    },
+    "DV_Top_Gun_SlasherplusAction": {
+        "events": [
+            85555,
+            79586,
+            59159,
+            54134,
+            52333
+        ]
+    },
+    "Eagles_Landing_DG_course": {
+        "events": [
+            53555
+        ]
+    },
+    "Eastview_Middle_School_Park": {
+        "events": []
+    },
+    "Edgemont": {
+        "events": [
+            68579
+        ]
+    },
+    "Elkwater_DGC": {
+        "events": []
+    },
+    "Evergreen_Park_AB": {
+        "events": [
+            81510,
+            66506,
+            61165,
+            49985,
+            49983,
+            50874,
+            46971
+        ]
+    },
+    "Fletcher_Park": {
+        "events": [
+            71450
+        ]
+    },
+    "Forest_Lawn": {
+        "events": [
+            67149,
+            59341
+        ]
+    },
+    "Four_Seasons_Park": {
+        "events": []
+    },
+    "Four_Sisters_Disc_Golf_Park": {
+        "events": []
+    },
+    "Four_Sisters_Disc_Golf_Park_AB": {
+        "events": []
+    },
+    "Stone_Creek_Disc_Golf_Park": {
+        "events": [
+            77184,
+            65390
+        ]
+    },
+    "Gilwell_Park": {
+        "events": [
+            80494,
+            82141,
+            80489,
+            74286
+        ]
+    },
+    "Granum_DGC": {
+        "events": []
+    },
+    "Gull_Lake_DGC": {
+        "events": []
+    },
+    "haltaur-bluffs-12253": {
+        "events": []
+    },
+    "Hartman_Green": {
+        "events": []
+    },
+    "Hermitage_Park": {
+        "events": [
+            76844,
+            76841,
+            68597,
+            68351,
+            57814,
+            57752
+        ]
+    },
+    "Hinton_DGC": {
+        "events": [
+            83587,
+            68534,
+            60617,
+            52617,
+            47160
+        ]
+    },
+    "Innisfail_Kinsemen_DGC": {
+        "events": []
+    },
+    "ivan-to-park-11009": {
+        "events": []
+    },
+    "Jubilee_Park": {
+        "events": []
+    },
+    "Kentwood_Park": {
+        "events": [
+            71140,
+            59444
+        ]
+    },
+    "kingswood-park-12500": {
+        "events": [
+            84641
+        ]
+    },
+    "kitscoty-disc-golf-course-11274": {
+        "events": [
+            78660
+        ]
+    },
+    "Lake_Sundance": {
+        "events": []
+    },
+    "Langholm_Park": {
+        "events": []
+    },
+    "Leinweber_Park": {
+        "events": [
+            82141,
+            50450
+        ]
+    },
+    "Lethbridge_College": {
+        "events": []
+    },
+    "Lions_Park_Fort_McMurray": {
+        "events": []
+    },
+    "Lions_Rotary_DGC": {
+        "events": [
+            77184,
+            65390,
+            50914,
+            47048
+        ]
+    },
+    "Lloyd_Park_AB": {
+        "events": [
+            84558,
+            71167,
+            49548,
+            52199,
+            47555,
+            46041
+        ]
+    },
+    "Lloyd_Park_Disc_Golf_Course": {
+        "events": []
+    },
+    "Magrath_Irrigation_Park": {
+        "events": [
+            83869,
+            79085,
+            77932,
+            70085,
+            67292,
+            67069,
+            59803,
+            57538,
+            57127,
+            49142,
+            50451
+        ]
+    },
+    "Medicine_Hat_College": {
+        "events": []
+    },
+    "Middle_Earth_DGC": {
+        "events": []
+    },
+    "Midland_Provincial_Park": {
+        "events": [
+            61349,
+            53910
+        ]
+    },
+    "Midnapore_Lake": {
+        "events": []
+    },
+    "Miners_Park": {
+        "events": [
+            67119
+        ]
+    },
+    "Miners_Park_Coalhurst": {
+        "events": [
+            78989
+        ]
+    },
+    "Muskoseepi_Park": {
+        "events": [
+            81510,
+            66506,
+            61165,
+            49981,
+            49983,
+            50874,
+            49962,
+            46970,
+            46481
+        ]
+    },
+    "Nicholas_Sheran_Park": {
+        "events": [
+            79178,
+            77161,
+            78785,
+            74494,
+            66784,
+            67479,
+            59420,
+            61679,
+            60610,
+            57344,
+            60229,
+            50047,
+            48985,
+            46685,
+            45413,
+            43837
+        ]
+    },
+    "Niska_Paskwahk_DCG": {
+        "events": []
+    },
+    "North_Glenmore_Park": {
+        "events": []
+    },
+    "Norwester_DGC": {
+        "events": []
+    },
+    "Old_Man_Park": {
+        "events": []
+    },
+    "Park_96": {
+        "events": [
+            59630,
+            57551
+        ]
+    },
+    "parkland-beach-dgc-11474": {
+        "events": [
+            81741,
+            74361
+        ]
+    },
+    "Peenaquim_Park": {
+        "events": [
+            79226,
+            66784,
+            56912,
+            57344
+        ]
+    },
+    "Prairie_College": {
+        "events": []
+    },
+    "Private_AB_Nat_Sats_Event_Course": {
+        "events": [
+            50951
+        ]
+    },
+    "Raven_Springs": {
+        "events": []
+    },
+    "red-tail-ridge-dgc-11162": {
+        "events": [
+            84305,
+            74325,
+            71828
+        ]
+    },
+    "red-tailed-ridge-11233": {
+        "events": [
+            84515,
+            81685
+        ]
+    },
+    "Redwood_Meadows_DGC": {
+        "events": [
+            47554
+        ]
+    },
+    "Refinery_Park": {
+        "events": []
+    },
+    "Riverside_Disc_Golf_Course": {
+        "events": []
+    },
+    "Rochon_Sands_DGC": {
+        "events": []
+    },
+    "Rocky_Lane_Fairways_and_Recreation": {
+        "events": [
+            79033,
+            78904,
+            68261,
+            67186,
+            60296,
+            52905
+        ]
+    },
+    "Rotary_Links_Golf_Course": {
+        "events": [
+            77184,
+            65390,
+            56177,
+            50914,
+            47048
+        ]
+    },
+    "Rundle_Park_DGC": {
+        "events": [
+            76844,
+            76369,
+            68597,
+            66814,
+            65570,
+            57814,
+            56345,
+            49194,
+            46131
+        ]
+    },
+    "RVGC_Disc_Golf_Course": {
+        "events": []
+    },
+    "sheep-river-park-11555": {
+        "events": []
+    },
+    "South_Bear_Creek": {
+        "events": [
+            81510,
+            66506,
+            58443,
+            61165,
+            49983,
+            49982,
+            50874,
+            46481
+        ]
+    },
+    "southview-links-disc-golf-course-11275": {
+        "events": [
+            73435
+        ]
+    },
+    "St_Marys_University_DGC": {
+        "events": []
+    },
+    "Stanley_Park": {
+        "events": []
+    },
+    "Camrose_Creek_DGC": {
+        "events": [
+            69682
+        ]
+    },
+    "Strathcona_Science_Park_DGC": {
+        "events": []
+    },
+    "Strathcona_Wilderness_Centre": {
+        "events": []
+    },
+    "Strathmore_Disc_Golf_Course": {
+        "events": [
+            81982,
+            70088,
+            70087,
+            70086,
+            59715,
+            59714,
+            59713,
+            54559,
+            50951,
+            53880,
+            52424,
+            52652,
+            52423,
+            47192,
+            46323,
+            46495
+        ]
+    },
+    "Sylvan_Lake_DGC": {
+        "events": [
+            80251,
+            71140,
+            59255,
+            61717,
+            52890
+        ]
+    },
+    "TBD_Alberta": {
+        "events": []
+    },
+    "The_Hills_at_Charlesworth": {
+        "events": []
+    },
+    "The_Three_Sisters": {
+        "events": []
+    },
+    "Thorncliffe_DGC": {
+        "events": []
+    },
+    "University_of_Lethbridge": {
+        "events": []
+    },
+    "Vermilion_Provincial_Park": {
+        "events": []
+    }
+}
