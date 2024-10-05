@@ -88,8 +88,10 @@ def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
                 EC.presence_of_element_located((By.XPATH, player_row_xpath)))
             soup = BeautifulSoup(driver.page_source, 'html.parser')
             tree: HtmlElement = html.fromstring(str(soup))
-            course_name = tree.xpath(course_name_xpath)[0]
-            course_layout = tree.xpath(course_layout_xpath)[0]
+            course_name = tree.xpath(course_name_xpath)[
+                0].text_content().strip()
+            course_layout = tree.xpath(course_layout_xpath)[
+                0].text_content().strip()
 
             # get low, high rating and calculate average
             layout_par = int(tree.xpath(layout_par_xpath)[0].text)
