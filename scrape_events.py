@@ -50,14 +50,16 @@ def get_all_sanctioned_events(course_name: str, after_date: datetime = None) -> 
     Raises:
         Exception: If no PDGA results are found for an event.
     """
-
-    url = course_events_url.format(course_name=course_name)
-    response = get_request_avoid_rate_limit(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    tree: HtmlElement = html.fromstring(str(soup))
-    sanctioned_events: list[HtmlElement] = tree.xpath(sanctioned_event_xpath)
-    event_urls = [base_url + event.get('href') for event in sanctioned_events]
-    event_ids = []
+    try:
+        url = course_events_url.format(course_name=course_name)
+        response = get_request_avoid_rate_limit(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        tree: HtmlElement = html.fromstring(str(soup))
+        sanctioned_events: list[HtmlElement] = tree.xpath(sanctioned_event_xpath)
+        event_urls = [base_url + event.get('href') for event in sanctioned_events]
+        event_ids = []
+    except:
+        return []
 
     for event_url in event_urls:
         try:

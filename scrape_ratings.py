@@ -31,8 +31,8 @@ round_picker_xpath = division_picker_xpath + '/following-sibling::div[1]'
 round_xpath = round_picker_xpath + '//div[contains(text(), "Rd")]'
 round_course_metadata_xpath = '//div[contains(@class, "round-course-meta")]'
 round_course_metadata_text_xpath = round_course_metadata_xpath + '//text()'
-course_layout_xpath = '//div[i[contains(@class, "course-layout")]]'
-course_name_xpath = '//div[i[contains(@class, "course-name")]]'
+course_layout_xpath = '//div[contains(@class, "course-meta")]//i[contains(@class, "pi-course-layout")]/parent::*'
+course_name_xpath = '//div[contains(@class, "course-meta")]//i[contains(@class, "pi-course-icon")]/parent::*'
 layout_par_xpath = "//div[contains(@class, 'header-col') and contains(string(),'Tot')]//div[contains(@class, 'label-2')]"
 player_row_xpath = '//div[contains(@class, "table-row-content")]'
 player_score_xpath = "//div[contains(@class, 'round-score')]"
@@ -44,7 +44,7 @@ player_row_cell_xpath = "//div[contains(@class, 'cell-wrapper')]//div"
 round_regex = r'Round (\d)'
 
 
-def get_round_ratings_for_tournament(event_id: int) -> dict[str, list]:
+def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
     """
     Fetches and calculates round ratings for a given tournament event.
     Args:
@@ -61,20 +61,23 @@ def get_round_ratings_for_tournament(event_id: int) -> dict[str, list]:
         Exception: If there is an error fetching or processing the rating data for any division or round.
     """
 
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1920,1080')
-    driver = webdriver.Chrome(options=options)
-    driver.get(score_page_url.format(event_id=event_id))
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, division_picker_xpath)))
+    try:
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--window-size=1920,1080')
+        driver = webdriver.Chrome(options=options)
+        driver.get(score_page_url.format(event_id=event_id))
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, division_picker_xpath)))
 
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    tree: HtmlElement = html.fromstring(str(soup))
-    divisions: list[str] = [x.text for x in tree.xpath(division_xpath)]
-    rounds: list[str] = [x.text for x in tree.xpath(round_xpath)]
-    rating_data = {}
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        tree: HtmlElement = html.fromstring(str(soup))
+        divisions: list[str] = [x.text for x in tree.xpath(division_xpath)]
+        rounds: list[str] = [x.text for x in tree.xpath(round_xpath)]
+        rating_data = []
+    except:
+        return []
 
     for division, round in product(divisions, rounds):
         try:
@@ -85,10 +88,8 @@ def get_round_ratings_for_tournament(event_id: int) -> dict[str, list]:
                 EC.presence_of_element_located((By.XPATH, player_row_xpath)))
             soup = BeautifulSoup(driver.page_source, 'html.parser')
             tree: HtmlElement = html.fromstring(str(soup))
-            metadata: list[_ElementUnicodeResult] = tree.xpath(
-                round_course_metadata_text_xpath)
-            layout_data = ''.join(
-                [data for data in metadata if not r.match(round_regex, data)]).strip()
+            course_name = tree.xpath(course_name_xpath)[0]
+            course_layout = tree.xpath(course_layout_xpath)[0]
 
             # get low, high rating and calculate average
             layout_par = int(tree.xpath(layout_par_xpath)[0].text)
@@ -116,16 +117,20 @@ def get_round_ratings_for_tournament(event_id: int) -> dict[str, list]:
             stroke_value = rating_diff / score_diff
             par_rating = int(last_player_rating +
                              (last_player_score * stroke_value))
-            rating_data[layout_data] = {
+            round_data = {
+                'course_name': course_name,
+                'course_layout': course_layout,
                 'round': round_number,
                 'players': len(player_rows),
+                'par': layout_par,
                 'high_rating': first_player_rating,
                 'low_rating': last_player_rating,
                 'stroke_value': stroke_value,
                 'par_rating': par_rating
             }
+            rating_data.append(round_data)
             logger.info(
-                f'Rating data for {division}, {round} fetched for layout {layout_data}')
+                f'Rating data for {division}, {round} fetched for layout {round_data}')
             # logger.info(score_page_specific_division_and_round_url.format(
             #     event_id=event_id, division=division, round_number=round_number))
             # logger.info(json.dumps(rating_data[layout_data], indent=4))
