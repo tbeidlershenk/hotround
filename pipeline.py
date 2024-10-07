@@ -1,4 +1,3 @@
-import threading
 from scrape_courses import get_courses_from_dgscene, get_readable_course_name
 from scrape_events import get_all_sanctioned_events
 from scrape_ratings import get_round_ratings_for_tournament
@@ -30,17 +29,17 @@ from logger import logger
 #         "events": [event_id]
 #     }
 # }
-logger.info('Fetching events...')
-with open('data/course_names.json') as f:
-    course_names: dict = json.load(f)
-course_events = {}
-for i, course in enumerate(course_names):
-    logger.info(f'Fetching event {i}/{len(course_names)}')
-    course_events[course] = get_all_sanctioned_events(course)
-with open('data/course_events.json', 'w') as f:
-    json.dump(course_events, f, indent=4)
-logger.info('Events fetched and dumped to course_events.json.')
-logger.info('')
+# logger.info('Fetching events...')
+# with open('data/course_names.json') as f:
+#     course_names: dict = json.load(f)
+# course_events = {}
+# for i, course in enumerate(course_names):
+#     logger.info(f'Fetching event {i}/{len(course_names)}')
+#     course_events[course] = get_all_sanctioned_events(course)
+# with open('data/course_events.json', 'w') as f:
+#     json.dump(course_events, f, indent=4)
+# logger.info('Events fetched and dumped to course_events.json.')
+# logger.info('')
 
 # TODO
 # run get_round_ratings_for_tournament for each event
@@ -67,7 +66,7 @@ with open('data/course_events.json') as f:
     course_events: dict = json.load(f)
 course_ratings = {}
 for course in course_events:
-    events = course_events[course]['events']
+    events = course_events[course]
     course_ratings[course] = {
         event: get_round_ratings_for_tournament(event) for event in events
     }

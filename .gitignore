@@ -3,3 +3,4 @@ Pipfile.lock
 test/
 __pycache__/
 venv/
+ratings.log
