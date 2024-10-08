@@ -61,15 +61,24 @@ from logger import logger
 #         }
 #     }
 # }
-logger.info('Fetching ratings...')
-with open('data/course_events.json') as f:
-    course_events: dict = json.load(f)
-course_ratings = {}
-for course in course_events:
-    events = course_events[course]
-    course_ratings[course] = {
-        event: get_round_ratings_for_tournament(event) for event in events
-    }
+try:
+    logger.info('Fetching ratings...')
+    with open('data/course_events.json') as f:
+        course_events: dict = json.load(f)
+    with open('data/course_ratings.json') as f:
+        course_ratings: dict = json.load(f)
+    for course in course_events:
+        if course in course_ratings:
+            logger.info(f'Skipping {course} (already scraped)...')
+            continue
+        logger.info(f'Fetching ratings for {course}...')
+        events = course_events[course]
+        course_ratings[course] = {
+            event: get_round_ratings_for_tournament(event) for event in events
+        }
+except BaseException as e:
+    logger.info(f'Error fetching ratings: {e}')
+
 with open('data/course_ratings.json', 'w') as f:
     json.dump(course_ratings, f, indent=4)
 logger.info('Ratings fetched and dumped to course_ratings.json.')

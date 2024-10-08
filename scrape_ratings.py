@@ -132,10 +132,7 @@ def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
             }
             rating_data.append(round_data)
             logger.info(
-                f'Rating data for {division}, {round} fetched for layout {round_data}')
-            # logger.info(score_page_specific_division_and_round_url.format(
-            #     event_id=event_id, division=division, round_number=round_number))
-            # logger.info(json.dumps(rating_data[layout_data], indent=4))
+                f'Rating data for {division}, {round} fetched for layout {json.dumps(round_data, indent=4)}')
         except Exception as e:
             logger.info(
                 f'Error fetching rating data for {division}, {round}: {e}')
