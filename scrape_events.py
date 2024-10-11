@@ -55,8 +55,10 @@ def get_all_sanctioned_events(course_name: str, after_date: datetime = None) -> 
         response = get_request_avoid_rate_limit(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         tree: HtmlElement = html.fromstring(str(soup))
-        sanctioned_events: list[HtmlElement] = tree.xpath(sanctioned_event_xpath)
-        event_urls = [base_url + event.get('href') for event in sanctioned_events]
+        sanctioned_events: list[HtmlElement] = tree.xpath(
+            sanctioned_event_xpath)
+        event_urls = [base_url + event.get('href')
+                      for event in sanctioned_events]
         event_ids = []
     except:
         return []

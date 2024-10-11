@@ -25,7 +25,7 @@ def get_request_avoid_rate_limit(url: str, sleep_time: int = 60) -> requests.Res
     return response
 
 
-def is_match(str1: str, str2: str) -> bool:
+def is_match(str1: str, str2: str, threshold: int = 80) -> bool:
     str1 = str1.replace('_', ' ')
     str2 = str2.replace('_', ' ')
-    return fuzz.partial_ratio(str1, str2) == 100
+    return fuzz.partial_ratio(str1, str2) >= threshold

@@ -131,11 +131,8 @@ def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
                 'par_rating': par_rating
             }
             rating_data.append(round_data)
-            logger.info(
-                f'Rating data for {division}, {round} fetched for layout {json.dumps(round_data, indent=4)}')
         except Exception as e:
-            logger.info(
-                f'Error fetching rating data for {division}, {round}: {e}')
+            pass
 
     driver.quit()
     return rating_data
