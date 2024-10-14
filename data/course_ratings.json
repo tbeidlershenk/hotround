@@ -79889,6 +79889,288 @@
                 "low_rating": 885,
                 "stroke_value": 8.75,
                 "par_rating": 928
+            }
+        ]
+    },
+    "Havergal_College": {},
+    "Hidden_Valley": {},
+    "Highland_Nordic": {
+        "84163": [
+            {
+                "course_name": "Highlands Nordic",
+                "course_layout": "LONGS - Peace Bridge 2024",
+                "round": 1,
+                "players": 13,
+                "par": 56,
+                "high_rating": 995,
+                "low_rating": 843,
+                "stroke_value": 9.5,
+                "par_rating": 966
             },
             {
-                
+                "course_name": "Highlands Nordic",
+                "course_layout": "LONGS - Peace Bridge 2024",
+                "round": 2,
+                "players": 13,
+                "par": 56,
+                "high_rating": 967,
+                "low_rating": 843,
+                "stroke_value": 9.538461538461538,
+                "par_rating": 967
+            },
+            {
+                "course_name": "Highlands Nordic",
+                "course_layout": "INTERMEDIATE  - Peace Bridge 2024",
+                "round": 1,
+                "players": 17,
+                "par": 58,
+                "high_rating": 942,
+                "low_rating": 812,
+                "stroke_value": 10.833333333333334,
+                "par_rating": 898
+            },
+            {
+                "course_name": "Highlands Nordic",
+                "course_layout": "LONGS - Peace Bridge 2024",
+                "round": 2,
+                "players": 17,
+                "par": 56,
+                "high_rating": 948,
+                "low_rating": 795,
+                "stroke_value": 9.5625,
+                "par_rating": 967
+            },
+            {
+                "course_name": "Highlands Nordic",
+                "course_layout": "INTERMEDIATE  - Peace Bridge 2024",
+                "round": 1,
+                "players": 14,
+                "par": 58,
+                "high_rating": 920,
+                "low_rating": 703,
+                "stroke_value": 10.85,
+                "par_rating": 898
+            },
+            {
+                "course_name": "Highlands Nordic",
+                "course_layout": "INTERMEDIATE  - Peace Bridge 2024",
+                "round": 2,
+                "players": 14,
+                "par": 58,
+                "high_rating": 942,
+                "low_rating": 790,
+                "stroke_value": 10.857142857142858,
+                "par_rating": 898
+            }
+        ]
+    },
+    "Hilton_Beach": {},
+    "Hockley_Valley_Resort": {},
+    "Homewood_Park": {},
+    "Homewood_Park_Disc_Golf_Course": {},
+    "Hunters_Creek_Golf_Club_and_Restaurant": {},
+    "Hunters_Creek": {},
+    "Irwin_Eagles_DGC": {},
+    "Island_Lake_Conservation_Area": {},
+    "J_B_Tudhope_Park": {},
+    "Kanata_DGC": {},
+    "Kawartha_Montessori_Campus": {
+        "68543": []
+    },
+    "kelso-conservation-11590": {
+        "84591": [
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 1,
+                "players": 7,
+                "par": 62,
+                "high_rating": 973,
+                "low_rating": 845,
+                "stroke_value": 9.846153846153847,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 2,
+                "players": 7,
+                "par": 62,
+                "high_rating": 953,
+                "low_rating": 816,
+                "stroke_value": 9.785714285714286,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 1,
+                "players": 7,
+                "par": 62,
+                "high_rating": 914,
+                "low_rating": 796,
+                "stroke_value": 9.833333333333334,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 2,
+                "players": 7,
+                "par": 62,
+                "high_rating": 894,
+                "low_rating": 718,
+                "stroke_value": 9.777777777777779,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 1,
+                "players": 2,
+                "par": 62,
+                "high_rating": 914,
+                "low_rating": 855,
+                "stroke_value": 9.833333333333334,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 2,
+                "players": 2,
+                "par": 62,
+                "high_rating": 904,
+                "low_rating": 865,
+                "stroke_value": 9.75,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 1,
+                "players": 9,
+                "par": 62,
+                "high_rating": 924,
+                "low_rating": 806,
+                "stroke_value": 9.833333333333334,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 2,
+                "players": 9,
+                "par": 62,
+                "high_rating": 914,
+                "low_rating": 855,
+                "stroke_value": 9.833333333333334,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 1,
+                "players": 19,
+                "par": 62,
+                "high_rating": 894,
+                "low_rating": 679,
+                "stroke_value": 9.772727272727273,
+                "par_rating": 894
+            },
+            {
+                "course_name": "Kelso",
+                "course_layout": "Blended Blue and Black",
+                "round": 2,
+                "players": 18,
+                "par": 62,
+                "high_rating": 904,
+                "low_rating": 747,
+                "stroke_value": 9.8125,
+                "par_rating": 894
+            }
+        ]
+    },
+    "ken-rei-conservation-area-11860": {},
+    "Kings_Forest_DGC": {},
+    "Kings_Forest_Golf_Course": {},
+    "Kintail": {},
+    "Kiwanis": {},
+    "Kiwanis_Club_of_Lakeshore_DGC": {},
+    "KOA_Brighton": {},
+    "la-verendrye-11545": {},
+    "Lafortune_Park": {},
+    "Lake_Whittaker_Conservation_Park": {},
+    "Lakewood_Park_ON": {
+        "79537": [],
+        "74709": [
+            {
+                "course_name": "Lakewood",
+                "course_layout": "Blue Tees",
+                "round": 1,
+                "players": 2,
+                "par": 56,
+                "high_rating": 968,
+                "low_rating": 908,
+                "stroke_value": 12.0,
+                "par_rating": 884
+            },
+            {
+                "course_name": "Lakewood",
+                "course_layout": "Blue Tees",
+                "round": 1,
+                "players": 8,
+                "par": 56,
+                "high_rating": 944,
+                "low_rating": 824,
+                "stroke_value": 12.0,
+                "par_rating": 884
+            },
+            {
+                "course_name": "Lakewood",
+                "course_layout": "Blue Tees",
+                "round": 1,
+                "players": 2,
+                "par": 56,
+                "high_rating": 908,
+                "low_rating": 800,
+                "stroke_value": 12.0,
+                "par_rating": 884
+            },
+            {
+                "course_name": "Lakewood",
+                "course_layout": "Blue Tees",
+                "round": 1,
+                "players": 3,
+                "par": 56,
+                "high_rating": 896,
+                "low_rating": 860,
+                "stroke_value": 12.0,
+                "par_rating": 884
+            },
+            {
+                "course_name": "Lakewood",
+                "course_layout": "Blue Tees",
+                "round": 1,
+                "players": 10,
+                "par": 56,
+                "high_rating": 896,
+                "low_rating": 644,
+                "stroke_value": 12.0,
+                "par_rating": 884
+            },
+            {
+                "course_name": "Lakewood",
+                "course_layout": "Blue Tees",
+                "round": 1,
+                "players": 2,
+                "par": 56,
+                "high_rating": 728,
+                "low_rating": 656,
+                "stroke_value": 12.0,
+                "par_rating": 884
+            }
+        ]
+    },
+    "Lampton_Golf_Course": {}
+}

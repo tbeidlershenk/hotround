@@ -67,44 +67,55 @@ try:
         course_events: dict = json.load(f)
     with open('data/course_ratings.json') as f:
         course_ratings: dict = json.load(f)
-    for course in course_events:
+
+    for i, course in enumerate(course_events):
         if course in course_ratings:
             logger.info(f'Skipping {course} (already scraped)...')
             continue
-        logger.info(f'Fetching ratings for {course}...')
+        course_ratings[course] = {}
         events = course_events[course]
-        course_ratings[course] = {
-            event: get_round_ratings_for_tournament(event) for event in events
-        }
+
+        for j, event in enumerate(events):
+            course_ratings[course][event] = get_round_ratings_for_tournament(
+                event)
+            logger.info(
+                f'Event {j+1}/{len(events)} - Course {i+1}/{len(course_events)}')
+
+        # periodically save ratings to file
+        with open('data/course_ratings.json', 'w') as f:
+            json.dump(course_ratings, f, indent=4)
+
 except BaseException as e:
     logger.info(f'Error fetching ratings: {e}')
+except KeyboardInterrupt as e:
+    logger.info(f'Error fetching ratings: {e}')
 
-with open('data/course_ratings.json', 'w') as f:
-    json.dump(course_ratings, f, indent=4)
-logger.info('Ratings fetched and dumped to course_ratings.json.')
-logger.info('')
+# with open('data/course_ratings.json', 'w') as f:
+#     json.dump(course_ratings, f, indent=4)
+# logger.info('Ratings dumped to course_ratings.json.')
+# logger.info('')
 
 # TODO
 # create one dictionary for all data
 # write to json
-logger.info('Compiling data...')
-with open('data/course_names.json') as f:
-    course_names: dict = json.load(f)
-with open('data/course_events.json') as f:
-    course_events: dict = json.load(f)
-with open('data/course_ratings.json') as f:
-    course_ratings: dict = json.load(f)
-course_data = {
-    course: {
-        'name': course_names[course],
-        'events': course_events[course],
-        'ratings': course_ratings[course]
-    } for course in course_names
-}
-with open('data/course_data.json', 'w') as f:
-    json.dump(course_data, f, indent=4)
-logger.info('Data compiled and dumped to course_data.json.')
-logger.info('')
+# logger.info('Compiling data...')
+# with open('data/course_names.json') as f:
+#     course_names: dict = json.load(f)
+# with open('data/course_events.json') as f:
+#     course_events: dict = json.load(f)
+# with open('data/course_ratings.json') as f:
+#     course_ratings: dict = json.load(f)
+# course_data = {
+#     course: {
+#         'name': course_names[course],
+#         'events': course_events[course],
+#         'ratings': course_ratings[course]
+#     } for course in course_names
+# }
+# with open('data/course_data.json', 'w') as f:
+#     json.dump(course_data, f, indent=4)
+# logger.info('Data compiled and dumped to course_data.json.')
+# logger.info('')
 
 # TODO
 # setup DB schema
