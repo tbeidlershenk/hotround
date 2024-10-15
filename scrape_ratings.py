@@ -10,6 +10,7 @@ from itertools import product
 import regex as r
 from fuzzywuzzy import process, fuzz
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -66,7 +67,9 @@ def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
         options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--window-size=1920,1080')
-        driver = webdriver.Chrome(options=options)
+        service = Service(
+            executable_path='/usr/lib/chromedriver')
+        driver = webdriver.Chrome(service=service, options=options)
         driver.get(score_page_url.format(event_id=event_id))
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, division_picker_xpath)))
