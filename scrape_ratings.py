@@ -76,7 +76,8 @@ def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
         divisions: list[str] = [x.text for x in tree.xpath(division_xpath)]
         rounds: list[str] = [x.text for x in tree.xpath(round_xpath)]
         rating_data = []
-    except:
+    except Exception as e:
+        logger.info(e)
         return []
 
     for division, round in product(divisions, rounds):
