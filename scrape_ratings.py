@@ -68,7 +68,7 @@ def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
         options.add_argument('--disable-gpu')
         options.add_argument('--window-size=1920,1080')
         service = Service(
-            executable_path='/usr/lib/chromedriver')
+            executable_path='/usr/bin/chromedriver')
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(score_page_url.format(event_id=event_id))
         WebDriverWait(driver, 10).until(
