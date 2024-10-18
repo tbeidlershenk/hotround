@@ -98,24 +98,24 @@ except KeyboardInterrupt as e:
 # TODO
 # create one dictionary for all data
 # write to json
-# logger.info('Compiling data...')
-# with open('data/course_names.json') as f:
-#     course_names: dict = json.load(f)
-# with open('data/course_events.json') as f:
-#     course_events: dict = json.load(f)
-# with open('data/course_ratings.json') as f:
-#     course_ratings: dict = json.load(f)
-# course_data = {
-#     course: {
-#         'name': course_names[course],
-#         'events': course_events[course],
-#         'ratings': course_ratings[course]
-#     } for course in course_names
-# }
-# with open('data/course_data.json', 'w') as f:
-#     json.dump(course_data, f, indent=4)
-# logger.info('Data compiled and dumped to course_data.json.')
-# logger.info('')
+logger.info('Compiling data...')
+with open('data/course_names.json') as f:
+    course_names: dict = json.load(f)
+with open('data/course_events.json') as f:
+    course_events: dict = json.load(f)
+with open('data/course_ratings.json') as f:
+    course_ratings: dict = json.load(f)
+course_data = {
+    course: {
+        'name': course_names[course],
+        'events': course_events[course],
+        'rounds': [round_data for _, round_data in course_ratings[course].items() if course in course_ratings.keys()]
+    } for course in course_names
+}
+with open('data/course_data.json', 'w') as f:
+    json.dump(course_data, f, indent=4)
+logger.info('Data compiled and dumped to course_data.json.')
+logger.info('')
 
 # TODO
 # setup DB schema

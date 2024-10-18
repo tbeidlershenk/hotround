@@ -1,3 +1,4 @@
+from typing import Any
 import requests
 from bs4 import BeautifulSoup, Tag
 import time
@@ -39,7 +40,7 @@ month_map = {
 }
 
 
-def get_all_sanctioned_events(course_name: str, after_date: datetime = None) -> list[int]:
+def get_all_sanctioned_events(course_name: str, after_date: datetime = None) -> dict:
     """
     Fetches all sanctioned event IDs for a given course name from a specified date.
     Args:
@@ -99,7 +100,10 @@ def get_all_sanctioned_events(course_name: str, after_date: datetime = None) -> 
                 # get event id from pdga url
                 event_id = int(pdga_url.replace(
                     pdga_event_page_base_url, ''))
-                event_ids.append(event_id)
+                event_ids.append({
+                    'event_id': event_id,
+                    'date': date_str
+                })
                 logger.info(f'Found event id: {event_id}')
 
         except Exception as e:

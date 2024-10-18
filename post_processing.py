@@ -15,7 +15,7 @@ def drop_rounds_from_other_courses(source_json: str, target_json: str) -> None:
         events: dict[int, list] = source_data[course]['events']
         rounds: list[dict] = itertools.chain.from_iterable(events.values())
         filtered_rounds = [x for x in rounds if is_match(
-            course_name, x['course'])]
+            course_name, x['course'])[0]]
 
     with open(target_json, 'w') as f:
         json.dump(source_data, f, indent=4)
@@ -25,21 +25,25 @@ def dry_run_drop_rounds_from_other_courses(source_json: str, target_json: str) -
     with open(source_json, 'r') as f:
         source_data = json.load(f)
 
+    with open('data/course_names.json', 'r') as f:
+        course_names = json.load(f)
+
     # removes the rounds for each course that aren't related to that course (ie. Knob Hill round under a Moraine tournament)
     # compare "readable course name" with "course name" in the round data
     for course in source_data:
-        course_name: str = source_data[course]['name']
-        events: dict[int, list] = source_data[course]['events']
+        course_name: str = course_names[course]
+        events: dict[int, list] = source_data[course]
         rounds: list[dict] = itertools.chain.from_iterable(events.values())
         for round in rounds:
-            if is_match(course_name, round['course']):
+            match, score = is_match(course_name, round['course_name'])
+            if match:
                 logger.info(
-                    f'Pass: {course_name} == {round["course"]}')
+                    f'Pass: {course_name} == {round["course_name"]}, score = {score}')
             else:
                 logger.info(
-                    f'Fail: {course_name} != {round["course"]}')
+                    f'Fail: {course_name} != {round["course_name"]}, score = {score}')
         filtered_rounds = [x for x in rounds if is_match(
-            course_name, x['course'])]
+            course_name, x['course_name'])]
 
 
 def remove_invalid_rounds(source_json: str, target_json: str) -> None:

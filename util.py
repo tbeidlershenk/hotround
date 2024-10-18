@@ -1,3 +1,4 @@
+from typing import Tuple
 import requests
 from logger import logger
 import time
@@ -25,7 +26,12 @@ def get_request_avoid_rate_limit(url: str, sleep_time: int = 60) -> requests.Res
     return response
 
 
-def is_match(str1: str, str2: str, threshold: int = 80) -> bool:
+def is_match(str1: str, str2: str, threshold: int = 55) -> tuple[bool, int]:
     str1 = str1.replace('_', ' ')
     str2 = str2.replace('_', ' ')
-    return fuzz.partial_ratio(str1, str2) >= threshold
+    score = fuzz.partial_ratio(str1, str2)
+    return score >= threshold, score
+
+
+def depluralize(word: str) -> str:
+    return word[:-1] if word.endswith('s') else word
