@@ -6,17 +6,19 @@ CREATE TABLE Courses (
 
 CREATE TABLE Events (
     event_id INT PRIMARY KEY NOT NULL,
-    course_id VARCHAR(50),
+    date DATE NOT NULL,
     FOREIGN KEY (course_id) REFERENCES Courses(course_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Tournament_Rounds (
     round_id INT PRIMARY KEY AUTO_INCREMENT,
-    event_id INT NOT NULL,
-    layout_id VARCHAR(50),  
+    layout_name VARCHAR(200),  
+    round_number INT NOT NULL,
+    num_players INT NOT NULL,
+    layout_par INT NOT NULL,
+    high_rating DECIMAL(4, 2) NOT NULL,
+    low_rating DECIMAL(4, 2) NOT NULL,
     par_rating DECIMAL(5, 2) NOT NULL,
     stroke_value DECIMAL(5, 2) NOT NULL,
-    num_players INT NOT NULL,
-    round_date DATE NOT NULL,
-    FOREIGN KEY (layout_id) REFERENCES Layouts(layout_id) ON DELETE CASCADE
+    FOREIGN KEY (event_id) REFERENCES Events(event_id) ON DELETE CASCADE
 );
