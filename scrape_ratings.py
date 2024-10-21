@@ -124,11 +124,12 @@ def get_round_ratings_for_tournament(event_id: int) -> list[dict[str, list]]:
             par_rating = int(last_player_rating +
                              (last_player_score * stroke_value))
             round_data = {
+                'event_id': event_id,
                 'course_name': course_name,
-                'course_layout': course_layout,
-                'round': round_number,
-                'players': len(player_rows),
-                'par': layout_par,
+                'layout_name': course_layout,
+                'round_number': round_number,
+                'num_players': len(player_rows),
+                'layout_par': layout_par,
                 'high_rating': first_player_rating,
                 'low_rating': last_player_rating,
                 'stroke_value': stroke_value,
