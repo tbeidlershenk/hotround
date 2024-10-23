@@ -28,7 +28,7 @@ INSERT_EVENTS = """
     VALUES 
     (
         %s, 
-        (SELECT course_id FROM Courses WHERE course_name = '%s'), 
+        (SELECT course_id FROM Courses c WHERE c.course_name = '%s'), 
         '%s'
     );
 """
@@ -65,8 +65,10 @@ def insert_course(cursor: Cursor, data: dict) -> bool:
         cursor = connection.cursor()
         cursor.execute(INSERT_COURSES % (data['course_name'], data['readable_course_name']))
         connection.commit()
+        print(INSERT_COURSES % (data['course_name'], data['readable_course_name']))
 
         events_list = [(event['event_id'], data['course_name'], event['date']) for event in data['events']]
+        print(INSERT_EVENTS % (events_list[0]))
         cursor.executemany(INSERT_EVENTS, events_list)
         connection.commit()
 
