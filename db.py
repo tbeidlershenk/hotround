@@ -29,7 +29,7 @@ INSERT_EVENTS = """
     (
         %s, 
         (SELECT course_id FROM Courses c WHERE c.course_name = '%s'), 
-        STR_TO_DATE('%s', '%%d-%%m-%%Y')
+        STR_TO_DATE(%s, '%%d-%%m-%%Y')
     );
 """
 
