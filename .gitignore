@@ -6,3 +6,4 @@ venv/
 ratings.log
 .DS_Store
 .prettierrc
+.env
