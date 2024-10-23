@@ -29,7 +29,7 @@ INSERT_EVENTS = """
     (
         %s, 
         (SELECT course_id FROM Courses c WHERE c.course_name = '%s'), 
-        STR_TO_DATE(%s, '%%d-%%m-%%Y')
+        STR_TO_DATE(%s, '%d-%m-%Y')
     );
 """
 
@@ -60,16 +60,13 @@ INSERT_ROUNDS = """
     );
 """
 
-def insert_course(cursor: Cursor, data: dict) -> bool:
+def insert_course(connection, data: dict) -> bool:
     try:
         cursor = connection.cursor()
         cursor.execute(INSERT_COURSES % (data['course_name'], data['readable_course_name']))
         connection.commit()
-        print(INSERT_COURSES % (data['course_name'], data['readable_course_name']))
 
         events_list = [(event['event_id'], data['course_name'], event['date']) for event in data['events']]
-        for event in events_list:
-            print(INSERT_EVENTS % (event))
         cursor.executemany(INSERT_EVENTS, events_list)
         connection.commit()
 
@@ -85,8 +82,6 @@ def insert_course(cursor: Cursor, data: dict) -> bool:
             round_data['event_id'])
             for round_data in data['rounds']
         ]
-        for round in rounds_list:
-            print(INSERT_ROUNDS % (round))
         cursor.executemany(INSERT_ROUNDS, rounds_list)
         connection.commit()
         return True
@@ -105,11 +100,9 @@ connection = connector.connect(
     password="BluePancakes1*",
     database="pdgaratingsdb"
 )
-cursor = connection.cursor()
 
 with open('test/test_course_data.json', 'r') as file:
     course_data: dict = json.load(file)
 
-result = insert_course(cursor, course_data)
-# result = insert_course(None, course_data)
+result = insert_course(connection, course_data)
 
