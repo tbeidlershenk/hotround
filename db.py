@@ -29,7 +29,7 @@ INSERT_EVENTS = """
     (
         %s, 
         (SELECT course_id FROM Courses c WHERE c.course_name = '%s'), 
-        '%s'
+        STR_TO_DATE('%s', '%%d-%%m-%%Y')
     );
 """
 
@@ -62,15 +62,16 @@ INSERT_ROUNDS = """
 
 def insert_course(cursor: Cursor, data: dict) -> bool:
     try:
-        cursor = connection.cursor()
-        cursor.execute(INSERT_COURSES % (data['course_name'], data['readable_course_name']))
-        connection.commit()
+        # cursor = connection.cursor()
+        # cursor.execute(INSERT_COURSES % (data['course_name'], data['readable_course_name']))
+        # connection.commit()
         print(INSERT_COURSES % (data['course_name'], data['readable_course_name']))
 
         events_list = [(event['event_id'], data['course_name'], event['date']) for event in data['events']]
-        print(INSERT_EVENTS % (events_list[0]))
-        cursor.executemany(INSERT_EVENTS, events_list)
-        connection.commit()
+        for event in events_list:
+            print(INSERT_EVENTS % (event))
+        # cursor.executemany(INSERT_EVENTS, events_list)
+        # connection.commit()
 
         rounds_list = [(
             round_data['layout_name'],
@@ -84,10 +85,13 @@ def insert_course(cursor: Cursor, data: dict) -> bool:
             round_data['event_id'])
             for round_data in data['rounds']
         ]
-        cursor.executemany(INSERT_ROUNDS, rounds_list)
-        connection.commit()
+        for round in rounds_list:
+            print(INSERT_ROUNDS % (round))
+        # cursor.executemany(INSERT_ROUNDS, rounds_list)
+        # connection.commit()
         return True
     except Exception as e:
+        
         logger.error(f"Error inserting course data: {e}")
         connection.rollback()
         return False
@@ -95,16 +99,17 @@ def insert_course(cursor: Cursor, data: dict) -> bool:
 load_dotenv()
 db_password = os.getenv("DB_PASSWORD")
 
-connection = connector.connect(
-    host="localhost",
-    user="pdga_rating_bot",
-    password="BluePancakes1*",
-    database="pdgaratingsdb"
-)
-cursor = connection.cursor()
+# connection = connector.connect(
+#     host="localhost",
+#     user="pdga_rating_bot",
+#     password="BluePancakes1*",
+#     database="pdgaratingsdb"
+# )
+# cursor = connection.cursor()
 
 with open('test/test_course_data.json', 'r') as file:
     course_data: dict = json.load(file)
 
-result = insert_course(cursor, course_data)
+# result = insert_course(cursor, course_data)
+result = insert_course(None, course_data)
 
