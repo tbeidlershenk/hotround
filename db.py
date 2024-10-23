@@ -15,8 +15,7 @@ INSERT_COURSES = """
     (
         '%s', 
         '%s'
-    )
-    ON CONFLICT (readable_course_name) DO NOTHING;
+    );
 """
 
 INSERT_EVENTS = """
@@ -31,8 +30,7 @@ INSERT_EVENTS = """
         %s, 
         (SELECT course_id FROM Courses WHERE course_name = '%s'), 
         '%s'
-    )
-    ON CONFLICT (event_id) DO NOTHING;
+    );
 """
 
 INSERT_ROUNDS = """
@@ -59,8 +57,7 @@ INSERT_ROUNDS = """
         %s, 
         %s, 
         %s
-    )
-    ON CONFLICT (event_id, round_number) DO NOTHING;
+    );
 """
 
 def insert_course(cursor: Cursor, data: dict) -> bool:
