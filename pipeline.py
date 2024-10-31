@@ -6,7 +6,7 @@ import json
 import itertools
 import chromedriver_autoinstaller
 
-database = Database("sqlite:///pdga_rating_bot.db")
+database = Database("sqlite:///data/pdga_data.db")
 scraper = Scraper()
 
 chromedriver_autoinstaller.install()
