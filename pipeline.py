@@ -6,8 +6,12 @@ import json
 import itertools
 import chromedriver_autoinstaller
 
-database = Database("sqlite:///data/pdga_data.db")
-scraper = Scraper()
+# Load configuration
+with open('config.json') as f:
+    config: dict = json.load(f)
+    
+database = Database(connection=config['db_connection'])
+scraper = Scraper(chromedriver_path=config['chromedriver_path'])
 
 chromedriver_autoinstaller.install()
 

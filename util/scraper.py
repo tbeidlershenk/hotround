@@ -33,12 +33,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from util.requests import get_request_avoid_rate_limit
 
 class Scraper:
-    def __init__(self) -> None:
+    def __init__(self, chromedriver_path: str = None) -> None:
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--window-size=1920,1080')
-        service = Service()
+        service = Service() if chromedriver_path is None else Service(chromedriver_path)
         self.driver = webdriver.Chrome(service=service, options=options)
 
 
