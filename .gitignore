@@ -4,7 +4,6 @@ data/
 __pycache__/
 ratings.log
 .DS_Store
-pdga_rating_bot.db
 Pipfile
 .prettierrc
 *.db
