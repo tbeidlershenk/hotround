@@ -31,7 +31,7 @@ try:
         elapsed_time = time.time() - start_time
         elapsed_time_str = time.strftime('%H:%M:%S', time.gmtime(elapsed_time))
         est_time_remaining = elapsed_time / (i + 1) * (len(course_events) - i)
-        est_time_str = time.strftime('%H:%M:%S', time.gmtime(est_time_remaining))
+        est_time_str = f'{int(est_time_remaining // 3600):02}:{time.strftime("%M:%S", time.gmtime(est_time_remaining % 3600))}'
         logger.info(f'Elapsed time: {elapsed_time_str} seconds, progress: {progress}, est. time remaining: {est_time_str}')
 
         events = course_events[course]
