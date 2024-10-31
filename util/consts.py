@@ -52,7 +52,7 @@ class Consts:
     pdgalive_course_layout_xpath = '//div[i[contains(@class, "pi-course-layout")]]'
     pdgalive_course_name_xpath = '//div[contains(@class, "course-string")]'
     pdgalive_layout_par_xpath = "//div[contains(@class, 'header-col') and contains(string(),'Tot')]//div[contains(@class, 'label-2')]"
-    pdgalive_layout_distance_xpath = "//div[contains(@class, 'header-col') and contains(string(),'Tot')]//div[contains(@class, 'hole-length')]"
+    pdgalive_hole_layout_distance_xpath = "//div[contains(@class, 'hole-length')]"
     pdgalive_player_row_xpath = '//div[contains(@class, "table-row-content")]'
     pdgalive_player_score_xpath = "//div[contains(@class, 'round-score')]"
     pdgalive_player_rating_xpath = "//div[contains(@class, 'cell-wrapper')]//div"

@@ -224,7 +224,9 @@ class Scraper:
 
                 # get low, high rating and calculate average
                 layout_par = int(tree.xpath(Consts.pdgalive_layout_par_xpath)[0].text)
-                layout_distance = int(tree.xpath(Consts.pdgalive_layout_distance_xpath)[0].text.replace('\'', ''))
+                layout_distances = tree.xpath(Consts.pdgalive_hole_layout_distance_xpath)
+                layout_hole_distances = [int(x.text.replace('\'', '')) for x in layout_distances[:-1]]
+                layout_total_distance = int(layout_distances[-1].text.replace('\'', ''))
                 player_rows: list[HtmlElement] = [x for x in tree.xpath(
                     Consts.pdgalive_player_row_xpath) if 'DNF' not in x.text_content()]
 
@@ -256,7 +258,8 @@ class Scraper:
                     'round_number': round_number,
                     'num_players': len(player_rows),
                     'layout_par': layout_par,
-                    'layout_distance': layout_distance,
+                    'layout_hole_distances': ', '.join([str(x) for x in layout_hole_distances]),
+                    'layout_total_distance': layout_total_distance,
                     'high_rating': first_player_rating,
                     'low_rating': last_player_rating,
                     'stroke_value': stroke_value,
