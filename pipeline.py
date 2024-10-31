@@ -5,6 +5,7 @@ from util.scraper import Scraper
 import json
 import itertools
 import chromedriver_autoinstaller
+import time
 
 # Load configuration
 with open('config.json') as f:
@@ -18,6 +19,7 @@ chromedriver_autoinstaller.install()
 # 4. Fetch ratings for each event and load into DB
 try:
     logger.info('Fetching ratings...')
+    start_time = time.time()
     
     with open('data/course_names.json') as f:
         course_names: dict = json.load(f)
@@ -25,11 +27,14 @@ try:
         course_events: dict = json.load(f)
     
     for i, course in enumerate(course_events):
-        events = course_events[course]
-        if len(events) == 0:
-            logger.info(f'Skipping {course} (no events found)...')
-            continue
+        progress = f'{i+1}/{len(course_events)}'
+        elapsed_time = time.time() - start_time
+        elapsed_time_str = time.strftime('%H:%M:%S', time.gmtime(elapsed_time))
+        est_time_remaining = elapsed_time / (i + 1) * (len(course_events) - i)
+        est_time_str = time.strftime('%H:%M:%S', time.gmtime(est_time_remaining))
+        logger.info(f'Elapsed time: {elapsed_time_str} seconds, progress: {progress}, est. time remaining: {est_time_str}')
 
+        events = course_events[course]
         rounds = []
 
         for j, event in enumerate(events):
@@ -41,10 +46,6 @@ try:
             course_ratings = scraper.get_round_ratings_for_tournament(event_id)
             rounds.extend(course_ratings)
             logger.info(f'Event {j+1}/{len(events)} - Course {i+1}/{len(course_events)}')
-
-        if len(rounds) == 0:
-            logger.info(f'Skipping {course} (no new rounds found)...')
-            continue
 
         data = {
             'course_name': course,
