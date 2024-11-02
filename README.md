@@ -15,8 +15,7 @@ Web interface coming soon!
 
 ![alt text](image.png)
 
+### Resources
+
 [Invite the bot here](https://discord.com/oauth2/authorize?client_id=1300645264591294475&permissions=8&integration_type=0&scope=bot)
-
-### Built with
-
-Python, Selenium, SQLAlchemy, Disnake
+Contact me with suggestions, or to help contribute!
