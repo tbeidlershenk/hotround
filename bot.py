@@ -6,7 +6,7 @@ from logger import logger
 from util.database import Database
 import json
 
-class CaddieBot(commands.Bot):
+class CaddieBot(commands.InteractionBot):
     def __init__(self, config: dict, **options):
         super().__init__(**options)
         self.database = Database(config['db_connection'])
@@ -14,14 +14,13 @@ class CaddieBot(commands.Bot):
 
     async def on_ready(self):
         logger.info(f'Logged in as {self.user} (ID: {self.user.id})')
-        logger.info('------')
 
 async def main():
     dotenv.load_dotenv()
     bot_token = os.getenv("BOT_TOKEN")
     with open('config.json') as config_file:
         config: dict = json.load(config_file)
-    bot = CaddieBot(config)  # Ensure to pass a command prefix or other required options
+    bot = CaddieBot(config) 
     bot.load_extensions("exts")
 
     # This starts the bot in much the same way as `bot.run` does, except in

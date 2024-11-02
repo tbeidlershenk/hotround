@@ -1,5 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, DECIMAL, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String
 from models.base import Base
 
 class Course(Base):

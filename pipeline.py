@@ -3,7 +3,6 @@ from logger import logger
 from util.database import Database
 from util.scraper import Scraper
 import json
-import itertools
 import chromedriver_autoinstaller
 import time
 

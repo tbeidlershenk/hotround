@@ -1,17 +1,18 @@
-import contextvars
-import difflib
-import aiohttp
+import datetime
 import disnake
 import disnake_plugins
 from disnake.ext import commands
 from bot import CaddieBot
-import numpy as np
-from decimal import Decimal
 from logger import logger
+from fuzzywuzzy import fuzz, process
+from Paginator import CreatePaginator
+from models.round import group_comparable_rounds
 
 plugin = disnake_plugins.Plugin()
+NEWLINE = '\n'
+COMMASPACE = ', '
 
-@plugin.slash_command(description="Calculates ratings for a specified course and layout.")
+@plugin.slash_command(description="Calculates ratings for a specified course and layout")
 async def get_ratings(
     inter: disnake.CommandInteraction, 
     course_name: str = commands.Param(max_length=100, description="Name of course you played"), 
@@ -29,44 +30,75 @@ async def get_ratings(
     bot: CaddieBot = plugin.bot
     rounds = bot.database.query_all_course_rounds(course_name)
     if len(rounds) == 0:
-        all_courses = [course.readable_course_name for course in bot.database.query_all_courses()]
-        similar_course_names = difflib.get_close_matches(course_name, all_courses)
-        await inter.response.send_message(f"No rounds found for {course_name}. Did you mean one of the following:\n{', '.join(similar_course_names)}?")
+        all_course_names = [course.readable_course_name for course in bot.database.query_all_courses()]
+        scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.partial_ratio, score_cutoff=0, limit=5)
+        similar_course_names = [course for course, _ in scored_course_names]
+        await inter.response.send_message(embed=disnake.Embed.from_dict({
+            "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
+            "description": f"No courses named '{course_name}'.",
+            "color": 0x1491A0,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "author": {
+                "name": "CaddieBot",
+                "url": "https://www.pdga.com/",
+                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
+            },
+            "fields": [
+                {"name": "Did you mean:", "value": f"{NEWLINE.join(similar_course_names[:5])}", "inline": "false"},
+            ]
+        }))
         return
-    
-    matching_rounds = [round for round in rounds if round.layout_name == layout_name]
-    rounds_used = len(matching_rounds)
-    if rounds_used == 0:
-        all_layout_names = [round.layout_name for round in rounds]
-        similar_layout_names = set(difflib.get_close_matches(layout_name, all_layout_names, n=100))
-        await inter.response.send_message(f"No rounds found for {layout_name} at {course_name}. Did you mean one of the following:\n{', '.join(similar_layout_names)}?")
+
+    all_layout_names = set([round.layout_name for round in rounds])
+    scored_layouts: tuple[str, int] = process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=0, limit=10)
+    best_layout_score = scored_layouts[0][1]
+    if best_layout_score < 75:
+        similar_layout_names = [layout for layout, _ in scored_layouts]
+        await inter.response.send_message(embed=disnake.Embed.from_dict({
+            "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
+            "description": f"No close matches for layout '{layout_name}'.",
+            "color": 0x1491A0,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "author": {
+                "name": "CaddieBot",
+                "url": "https://www.pdga.com/",
+                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
+            },
+            "fields": [
+                {"name": "Did you mean:", "value": f"{NEWLINE.join(similar_layout_names[:5])}", "inline": "false"},
+            ]
+        }))
         return
-    
-    # par_ratings = np.array([round.par_rating for round in matching_rounds])
-    # stroke_values = np.array([round.stroke_value for round in matching_rounds])
 
-    # par_rating_mean = np.mean(par_ratings)
-    # par_rating_std = np.std(par_ratings)
-    # stroke_value_mean = np.mean(stroke_values)
-    # stroke_value_std = np.std(stroke_values)
+    matching_layout_names = [layout for layout, _ in process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=75, limit=100)]
+    matching_rounds = [round for round in rounds if round.layout_name in matching_layout_names]
+    grouped_layouts = group_comparable_rounds(matching_rounds)
+    embeds = [
+        disnake.Embed.from_dict({
+            "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
+            "description": f"Found {len(grouped_layouts)} results that might match your query.",
+            "color": 0x1491A0,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "author": {
+                "name": "CaddieBot",
+                "url": "https://www.pdga.com/",
+                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
+            },
+            "fields": [
+                {"name": "PDGALive layouts used", "value": f"{NEWLINE.join(layout.layout_names)}", "inline": "false"},
+                {"name": "Layout information", "value": "", "inline": "false"},
+                {"name": "", "value": f"{layout.hole_distances(3)[0]}", "inline": "true"},
+                {"name": "", "value": f"{layout.hole_distances(3)[1]}", "inline": "true"},
+                {"name": "", "value": f"{layout.hole_distances(3)[2]}", "inline": "true"},
+                {"name": "", "value": f"{layout.course_metadata()}", "inline": "false"},
+                {"name": "Calculated rating", "value": f"{layout.score_rating(score)}", "inline": "false"},
+            ]
+        })
+        for layout in grouped_layouts
+    ]
 
-    # filtered_rounds = [
-    #     round for round in matching_rounds 
-    #     if abs(round.par_rating - par_rating_mean) <= 2 * par_rating_std and 
-    #        abs(round.stroke_value - stroke_value_mean) <= 2 * stroke_value_std
-    # ]
-
-    # rounds_used = len(filtered_rounds)
-    # if rounds_used == 0:
-    #     await inter.response.send_message(f"All rounds for {layout_name} at {course_name} are considered outliers.")
-    #     return
-
-    average_par_rating = sum([round.par_rating for round in matching_rounds]) / rounds_used
-    average_stroke_value = sum([round.stroke_value for round in matching_rounds if round.stroke_value > 0]) / rounds_used
-    average_par_rating = Decimal(average_par_rating)
-    average_stroke_value = Decimal(average_stroke_value)
-    calculated_rating = int(average_par_rating - (Decimal(score) * average_stroke_value))
-    
-    await inter.response.send_message(f"Calculated rating: {calculated_rating} based on {rounds_used} rounds at {layout_name} on {course_name}")
+    author_id = inter.author.id 
+    await inter.response.send_message(embed=embeds[0], view=CreatePaginator(embeds, author_id)) 
+    logger.info(f"User {author_id} requested ratings for {course_name}, {layout_name} with score {score}")
 
 setup, teardown = plugin.create_extension_handlers()
