@@ -3,7 +3,7 @@ import disnake
 import disnake_plugins
 from disnake.ext import commands
 from bot import CaddieBot
-from logger import logger
+import logging
 from fuzzywuzzy import fuzz, process
 from Paginator import CreatePaginator
 from models.round import group_comparable_rounds
@@ -118,6 +118,6 @@ async def get_ratings(
 
     author_id = inter.author.id 
     await inter.response.send_message(embed=embeds[0], view=CreatePaginator(embeds, author_id), ephemeral=False) 
-    logger.info(f"User {author_id} requested ratings for {course_name}, {layout_name} with score {score}")
+    logging.info(f"User {author_id} requested ratings for {course_name}, {layout_name} with score {score}")
 
 setup, teardown = plugin.create_extension_handlers()

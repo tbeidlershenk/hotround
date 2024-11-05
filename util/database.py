@@ -5,7 +5,7 @@ from models.course import Course
 from models.event import Event
 from models.round import Round
 from datetime import datetime
-from logger import logger
+import logging
 from sqlalchemy.orm import joinedload
 
 class Database:
@@ -51,7 +51,7 @@ class Database:
             self.session.merge(round)
 
         self.session.commit()
-        logger.info(f'Inserted course data for {data["course_name"]}')
+        logging.info(f'Inserted course data for {data["course_name"]}')
         return True
         
     def event_exists(self, event_id: int) -> bool:

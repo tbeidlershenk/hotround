@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup, Tag
 import time
-from logger import logger
+from logging import logging
 from util.requests import get_request_avoid_rate_limit
 from lxml import html
 from lxml.html import HtmlElement
@@ -9,7 +9,7 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup, Tag
 import time
-from logger import logger
+from logging import logging
 from datetime import datetime
 from lxml import html
 from lxml.html import HtmlElement
@@ -21,7 +21,7 @@ from selenium.common.exceptions import TimeoutException
 import regex as re
 from util.consts import Consts
 from bs4 import BeautifulSoup
-from logger import logger
+import logging
 from lxml import html
 from lxml.html import HtmlElement
 from itertools import product
@@ -73,9 +73,9 @@ class Scraper:
                 courses = [x.get('href').replace('/courses/', '')
                         for x in course_link_elements]
                 all_courses += courses
-                logger.info(f'Fetched {len(courses)} courses for {location}')
+                logging.info(f'Fetched {len(courses)} courses for {location}')
             except Exception as e:
-                logger.info(f'Error fetching courses for {location}: {e}')
+                logging.info(f'Error fetching courses for {location}: {e}')
 
         return all_courses
 
@@ -95,10 +95,10 @@ class Scraper:
             course_name_element: HtmlElement = tree.xpath(
                 Consts.dgscene_course_name_header_xpath)[0]
             readable_name = course_name_element.text.strip()
-            logger.info(f'Fetched {readable_name} for {course_name}')
+            logging.info(f'Fetched {readable_name} for {course_name}')
             return readable_name
         except Exception as e:
-            logger.info(f'Error fetching readable name for {course_name}: {e}')
+            logging.info(f'Error fetching readable name for {course_name}: {e}')
             return course_name
 
 
@@ -128,7 +128,7 @@ class Scraper:
 
         for event_url in event_urls:
             try:
-                logger.info(f'Fetching data for: {event_url}')
+                logging.info(f'Fetching data for: {event_url}')
 
                 # request the dgscene event page
                 response = get_request_avoid_rate_limit(event_url)
@@ -166,13 +166,13 @@ class Scraper:
                         'event_id': event_id,
                         'date': date_str
                     })
-                    logger.info(f'Found event id: {event_id}')
+                    logging.info(f'Found event id: {event_id}')
 
             except Exception as e:
-                logger.info(f'Error: {e}')
-                logger.info(f'Skipping: {event_url}')
+                logging.info(f'Error: {e}')
+                logging.info(f'Skipping: {event_url}')
 
-            logger.info('')
+            logging.info('')
 
         return event_ids
 
@@ -205,7 +205,7 @@ class Scraper:
             rounds: list[str] = [x.text for x in tree.xpath(Consts.pdgalive_round_xpath)]
             rating_data = []
         except Exception as e:
-            logger.info(e)
+            logging.info(e)
             return []
 
         for division, round in product(divisions, rounds):
