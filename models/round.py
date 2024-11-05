@@ -51,7 +51,16 @@ class Layout:
         return (f"Total distance {self.layout_total_distance}, Par {self.layout_par}\n"
                 f"Calculated using [{len(self.rounds_used)} rounds]({to_pdgalive_link(self.rounds_used[0])})\n")
 
-def group_comparable_rounds(rounds: list[Round]) -> list[Layout]:
+def remove_distance_outliers(rounds: list[Round], threshold: int):
+    distances = np.array([round.layout_total_distance for round in rounds])
+    upper_quartile = np.percentile(distances, 75)
+    lower_quartile = np.percentile(distances, 25)
+    iqr = (upper_quartile - lower_quartile) * threshold
+    quartile_set = (lower_quartile - iqr, upper_quartile + iqr)
+    filtered_rounds = [round for round in rounds if quartile_set[0] <= round.layout_total_distance <= quartile_set[1]]
+    return filtered_rounds
+
+def group_comparable_rounds(rounds: list[Round], threshold: int = 300) -> list[Layout]:
     """
     Groups rounds into comparable layouts based on their hole distances, total distance, and par.
     Args:
@@ -59,15 +68,16 @@ def group_comparable_rounds(rounds: list[Round]) -> list[Layout]:
     Returns:
         list[Layout]: A list of Layout objects, each representing a group of comparable rounds.
     """
-    rounds.sort(key=lambda r: (r.layout_hole_distances, r.layout_total_distance, r.layout_par))
+    
+
     layout_groups = []
-    for key, group in groupby(rounds, key=lambda r: (r.layout_hole_distances, r.layout_total_distance, r.layout_par)):
-        group_list = list(group)
+    for key, group in groupby(rounds, key=lambda r: r.layout_par):
+        group_list = remove_distance_outliers(list(group), threshold)
         layout_groups.append(
             Layout(
-                key[0], 
-                key[1], 
-                key[2], 
+                "",
+                int(np.mean([r.layout_total_distance for r in group_list])),
+                key, 
                 list(set([r.layout_name for r in group_list])), 
                 group_list
             )

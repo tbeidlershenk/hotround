@@ -12,3 +12,4 @@ regex==2024.9.11
 selenium==4.26.1
 SQLAlchemy==2.0.35
 tqdm==4.66.5
+disnake-ext-plugins==0.3.0

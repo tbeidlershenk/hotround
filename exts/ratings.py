@@ -28,14 +28,15 @@ async def get_ratings(
         None
     """
     bot: CaddieBot = plugin.bot
-    rounds = bot.database.query_all_course_rounds(course_name)
-    if len(rounds) == 0:
-        all_course_names = [course.readable_course_name for course in bot.database.query_all_courses()]
-        scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
+    all_course_names = [course.readable_course_name for course in bot.database.query_all_courses()]
+    scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
+
+    # ERR: No close course matches
+    if len(scored_course_names) == 0 or scored_course_names[0][1] < 90:
         similar_course_names = [course for course, _ in scored_course_names]
         await inter.response.send_message(embed=disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"No courses named '{course_name}'.",
+            "description": f"No close matches for course '{course_name}'.",
             "color": 0x1491A0,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
@@ -48,11 +49,29 @@ async def get_ratings(
             ]
         }), ephemeral=False)
         return
-
+    
+    course_name = scored_course_names[0][0]
+    rounds = bot.database.query_all_course_rounds(course_name)
     all_layout_names = set([round.layout_name for round in rounds])
     scored_layouts: tuple[str, int] = process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=0, limit=10)
-    best_layout_score = scored_layouts[0][1]
-    if best_layout_score < 75:
+
+    # ERR: No sanctioned rounds
+    if len(scored_layouts) == 0:
+        await inter.response.send_message(embed=disnake.Embed.from_dict({
+            "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
+            "description": f"No PDGA tournaments found for '{course_name}'.",
+            "color": 0x1491A0,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "author": {
+                "name": "CaddieBot",
+                "url": "https://www.pdga.com/",
+                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
+            }
+        }), ephemeral=False)
+        return
+    
+    # ERR: No close layout matches
+    if scored_layouts[0][1] < 75:
         similar_layout_names = [layout for layout, _ in scored_layouts]
         await inter.response.send_message(embed=disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
