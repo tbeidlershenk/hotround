@@ -18,7 +18,7 @@ class CaddieBot(commands.InteractionBot):
 async def main():
     dotenv.load_dotenv()
     bot_token = os.getenv("BOT_TOKEN")
-    with open('config.json') as config_file:
+    with open('bot_config.json') as config_file:
         config: dict = json.load(config_file)
     bot = CaddieBot(config) 
     bot.load_extensions("exts")

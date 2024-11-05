@@ -62,7 +62,8 @@ class Database:
         return all_courses
     
     def query_all_course_rounds(self, readable_course_name: str) -> list[Round]:
-        course = self.session.query(Course).filter_by(readable_course_name=readable_course_name).first()
+        course = self.session.query(Course).filter(Course.readable_course_name.ilike(readable_course_name)).first()
+        
         if not course:
             return []
         

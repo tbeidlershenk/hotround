@@ -1,0 +1,7 @@
+{
+    "db_connection": "sqlite:///data/pdga_data.db",
+    "chromedriver_path": null,
+    "events_json": "data/course_events.json",
+    "courses_json": "data/course_names.json",
+    "events_start": "2024-08-31"
+}

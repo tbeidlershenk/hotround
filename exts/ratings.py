@@ -31,7 +31,7 @@ async def get_ratings(
     rounds = bot.database.query_all_course_rounds(course_name)
     if len(rounds) == 0:
         all_course_names = [course.readable_course_name for course in bot.database.query_all_courses()]
-        scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.partial_ratio, score_cutoff=0, limit=5)
+        scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
         similar_course_names = [course for course, _ in scored_course_names]
         await inter.response.send_message(embed=disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
@@ -46,7 +46,7 @@ async def get_ratings(
             "fields": [
                 {"name": "Did you mean:", "value": f"{NEWLINE.join(similar_course_names[:5])}", "inline": "false"},
             ]
-        }))
+        }), ephemeral=False)
         return
 
     all_layout_names = set([round.layout_name for round in rounds])
@@ -67,7 +67,7 @@ async def get_ratings(
             "fields": [
                 {"name": "Did you mean:", "value": f"{NEWLINE.join(similar_layout_names[:5])}", "inline": "false"},
             ]
-        }))
+        }), ephemeral=False)
         return
 
     matching_layout_names = [layout for layout, _ in process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=75, limit=100)]
@@ -76,7 +76,7 @@ async def get_ratings(
     embeds = [
         disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"Found {len(grouped_layouts)} results that might match your query.",
+            "description": f"Found {len(grouped_layouts)} results that might match your query.\nLayouts are matched using hole distances\n(pin positions) & total par.",
             "color": 0x1491A0,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
@@ -98,7 +98,7 @@ async def get_ratings(
     ]
 
     author_id = inter.author.id 
-    await inter.response.send_message(embed=embeds[0], view=CreatePaginator(embeds, author_id)) 
+    await inter.response.send_message(embed=embeds[0], view=CreatePaginator(embeds, author_id), ephemeral=False) 
     logger.info(f"User {author_id} requested ratings for {course_name}, {layout_name} with score {score}")
 
 setup, teardown = plugin.create_extension_handlers()

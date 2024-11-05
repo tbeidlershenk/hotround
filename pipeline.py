@@ -5,9 +5,11 @@ from util.scraper import Scraper
 import json
 import chromedriver_autoinstaller
 import time
+from time import sleep
+from tqdm import tqdm
 
 # Load configuration
-with open('config.json') as f:
+with open('scraper_config.json') as f:
     config: dict = json.load(f)
     
 database = Database(connection=config['db_connection'])
@@ -19,12 +21,19 @@ chromedriver_autoinstaller.install()
 try:
     logger.info('Fetching ratings...')
     start_time = time.time()
-    
-    with open('data/course_names.json') as f:
-        course_names: dict = json.load(f)
-    with open('data/course_events.json') as f:
-        course_events: dict = json.load(f)
-    
+
+    if config['courses_json'] is not None:
+        with open(config['courses_json']) as f:
+            course_names: dict = json.load(f)
+    else:
+        course_names = {x.course_name : x.readable_course_name for x in database.query_all_courses()}
+
+    if config['events_json'] is not None:
+        with open(config['events_json']) as f:
+            course_events: dict = json.load(f)
+    else:
+        course_events = [scraper.get_all_sanctioned_events(x, config['events_start']) for x in course_names.keys()]
+
     for i, course in enumerate(course_events):
         progress = f'{i+1}/{len(course_events)}'
         elapsed_time = time.time() - start_time
