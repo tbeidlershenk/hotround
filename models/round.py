@@ -85,21 +85,26 @@ def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[L
     rounds.sort(key=lambda x: x.layout_par)
     for key, group in groupby(rounds, key=lambda r: int(r.layout_par)):
         group_list = remove_distance_outliers(list(group), threshold)
-        # group_list = remove_rating_outliers(group_list)
         str_hole_dists = [r.layout_hole_distances.split(', ') for r in group_list]
         hole_dists = [[int(x) for x in y] for y in str_hole_dists]
         averaged_hole_dists = []
         for i in range(len(hole_dists[0])):
             average_hole_dist = int(np.mean([hole_dists[j][i] for j in range(len(hole_dists))]))
             averaged_hole_dists.append(average_hole_dist)
-        layout_groups.append(
-            Layout(
-                averaged_hole_dists,
-                int(np.mean([r.layout_total_distance for r in group_list])),
-                key, 
-                list(set([r.layout_name for r in group_list])), 
-                group_list
-            )
+
+        layout = Layout(
+            averaged_hole_dists,
+            int(np.mean([r.layout_total_distance for r in group_list])),
+            key, 
+            list(set([r.layout_name for r in group_list])), 
+            group_list
         )
+
+        # bit of a hack for now. add DB constraints to prevent wild outliers
+        if layout.score_rating(0)['error'] > 100:
+            continue
+        # else, add it
+        layout_groups.append(layout)
+
     layout_groups.sort(key=lambda x: len(x.rounds_used), reverse=True)
     return layout_groups
