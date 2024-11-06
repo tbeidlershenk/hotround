@@ -93,6 +93,7 @@ async def get_ratings(
     matching_layout_names = [layout for layout, _ in process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=75, limit=100)]
     matching_rounds = [round for round in rounds if round.layout_name in matching_layout_names]
     grouped_layouts = group_comparable_rounds(matching_rounds, threshold=0.5)
+    grouped_layouts.sort(key=lambda x: sum(s for (_, s) in process.extractBests(layout_name, x.layout_names)), reverse=True)
     embeds = [
         disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
@@ -107,15 +108,14 @@ async def get_ratings(
             "fields": [
                 {"name": "Layouts used", "value": "", "inline": "false"},
                 {"name": "", "value": f"{NEWLINE.join(layout.layouts_used()[:5])}", "inline": "false"},
-                {"name": "Layout information", "value": "", "inline": "false"},
+                {"name": "", "value": f"{layout.course_metadata()}", "inline": "false"},
                 {"name": "", "value": f"{layout.hole_distances(3)[0]}", "inline": "true"},
                 {"name": "", "value": f"{layout.hole_distances(3)[1]}", "inline": "true"},
                 {"name": "", "value": f"{layout.hole_distances(3)[2]}", "inline": "true"},
-                {"name": "", "value": f"{layout.course_metadata()}", "inline": "false"},
-                {"name": "Calculated rating", "value": f"{layout.score_rating(score)['rating']}\n**Error:** +/- {layout.score_rating(score)['error']}", "inline": "false"},
+                {"name": "", "value": f"Calculated rating: **{layout.score_rating(score)['rating']}**", "inline": "false"},
             ],
             "footer": {
-                "text": f"Calculated from {len(layout.layouts_used())} tournament(s), {len(layout.rounds_used)} round",
+                "text": f"From {len(layout.layouts_used())} tournament(s), {len(layout.rounds_used)} round",
             }
         })
         for layout in grouped_layouts

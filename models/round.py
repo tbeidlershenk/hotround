@@ -52,7 +52,7 @@ class Layout:
         return hole_columns
     
     def course_metadata(self) -> str:
-        return (f"**Distance** {self.layout_total_distance} feet, **Par** {self.layout_par}")
+        return (f"Par {self.layout_par}, Distance {self.layout_total_distance} feet")
 
 def remove_distance_outliers(rounds: list[Round], threshold: int):
     distances = np.array([round.layout_total_distance for round in rounds])
