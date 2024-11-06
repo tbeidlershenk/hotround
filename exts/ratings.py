@@ -93,7 +93,6 @@ async def get_ratings(
     matching_layout_names = [layout for layout, _ in process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=75, limit=100)]
     matching_rounds = [round for round in rounds if round.layout_name in matching_layout_names]
     grouped_layouts = group_comparable_rounds(matching_rounds, threshold=0.5)
-    print(grouped_layouts)
     embeds = [
         disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
