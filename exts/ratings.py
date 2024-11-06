@@ -30,7 +30,7 @@ async def get_ratings(
     # await inter.response.defer()
     bot: CaddieBot = plugin.bot
     all_course_names = [course.readable_course_name for course in bot.database.query_all_courses()]
-    scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_sort_ratio, score_cutoff=0, limit=5)
+    scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
 
     # ERR: No close course matches
     if len(scored_course_names) == 0 or scored_course_names[0][1] < 90:
@@ -54,7 +54,7 @@ async def get_ratings(
     course_name = scored_course_names[0][0]
     rounds = bot.database.query_all_course_rounds(course_name)
     all_layout_names = set([round.layout_name for round in rounds])
-    scored_layouts: tuple[str, int] = process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=0, limit=10)
+    scored_layouts: tuple[str, int] = process.extractBests(layout_name, all_layout_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=10)
 
     # ERR: No sanctioned rounds
     if len(scored_layouts) == 0:
@@ -90,7 +90,7 @@ async def get_ratings(
         }), ephemeral=False)
         return
 
-    matching_layout_names = [layout for layout, _ in process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=75, limit=100)]
+    matching_layout_names = [layout for layout, _ in process.extractBests(layout_name, all_layout_names, scorer=fuzz.token_set_ratio, score_cutoff=75, limit=100)]
     matching_rounds = [round for round in rounds if round.layout_name in matching_layout_names]
     grouped_layouts = group_comparable_rounds(matching_rounds, threshold=0.5)
     grouped_layouts.sort(key=lambda x: sum(s for (_, s) in process.extractBests(layout_name, x.layout_names)), reverse=True)
