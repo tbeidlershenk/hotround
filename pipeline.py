@@ -1,4 +1,5 @@
 import logging
+import logging.handlers
 from util.database import Database
 from util.scraper import Scraper
 import json
@@ -6,6 +7,12 @@ import chromedriver_autoinstaller
 import time
 from time import sleep
 from tqdm import tqdm
+import sys
+
+logging.basicConfig(level=logging.INFO)
+stream_handler = logging.StreamHandler(stream=sys.stdout)
+stream_handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
+logging.getLogger().addHandler(stream_handler)
 
 # Load configuration
 with open('scraper_config.json') as f:

@@ -14,6 +14,7 @@ class Database:
         Base.metadata.create_all(engine)
         session = sessionmaker(bind=engine)
         self.session: Session = session()
+        self.logger = logging.getLogger()
 
     def insert_course_data(self, data: dict) -> None:
         course = Course(
@@ -51,7 +52,7 @@ class Database:
             self.session.merge(round)
 
         self.session.commit()
-        logging.info(f'Inserted course data for {data["course_name"]}')
+        self.logger.info(f'Inserted course data for {data["course_name"]}')
         return True
         
     def event_exists(self, event_id: int) -> bool:
