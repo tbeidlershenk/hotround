@@ -51,7 +51,6 @@ async def get_ratings(
         }), ephemeral=False)
         return
     
-    course_name = scored_course_names[0][0]
     rounds = bot.database.query_all_course_rounds(course_name)
     all_layout_names = set([round.layout_name for round in rounds])
     scored_layouts: tuple[str, int] = process.extractBests(layout_name, all_layout_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=10)
