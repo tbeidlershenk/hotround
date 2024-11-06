@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup, Tag
 import time
-from logging import logging
+import logging
 from util.requests import get_request_avoid_rate_limit
 from lxml import html
 from lxml.html import HtmlElement
@@ -9,7 +9,7 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup, Tag
 import time
-from logging import logging
+import logging
 from datetime import datetime
 from lxml import html
 from lxml.html import HtmlElement

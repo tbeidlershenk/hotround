@@ -3,10 +3,10 @@ import disnake
 import disnake_plugins
 from disnake.ext import commands
 from bot import CaddieBot
-import logging
 from fuzzywuzzy import fuzz, process
-from Paginator import CreatePaginator
+import logging
 from models.round import group_comparable_rounds
+from Paginator import CreatePaginator
 
 plugin = disnake_plugins.Plugin()
 NEWLINE = '\n'
@@ -27,9 +27,10 @@ async def get_ratings(
     Returns:
         None
     """
+    # await inter.response.defer()
     bot: CaddieBot = plugin.bot
     all_course_names = [course.readable_course_name for course in bot.database.query_all_courses()]
-    scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
+    scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_sort_ratio, score_cutoff=0, limit=5)
 
     # ERR: No close course matches
     if len(scored_course_names) == 0 or scored_course_names[0][1] < 90:
@@ -91,11 +92,12 @@ async def get_ratings(
 
     matching_layout_names = [layout for layout, _ in process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=75, limit=100)]
     matching_rounds = [round for round in rounds if round.layout_name in matching_layout_names]
-    grouped_layouts = group_comparable_rounds(matching_rounds)
+    grouped_layouts = group_comparable_rounds(matching_rounds, threshold=0.5)
+    print(grouped_layouts)
     embeds = [
         disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"Found {len(grouped_layouts)} results that might match your query.\nLayouts are matched using hole distances\n(pin positions) & total par.",
+            "description": f"Found {len(grouped_layouts)} results that might match your query.\nLayouts matched with total par, merging pin positions.",
             "color": 0x1491A0,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
@@ -104,20 +106,22 @@ async def get_ratings(
                 "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
             },
             "fields": [
-                {"name": "PDGALive layouts used", "value": f"{NEWLINE.join(layout.layout_names)}", "inline": "false"},
+                {"name": "Layouts used", "value": "", "inline": "false"},
+                {"name": "", "value": f"{NEWLINE.join(layout.layouts_used()[:5])}", "inline": "false"},
                 {"name": "Layout information", "value": "", "inline": "false"},
                 {"name": "", "value": f"{layout.hole_distances(3)[0]}", "inline": "true"},
                 {"name": "", "value": f"{layout.hole_distances(3)[1]}", "inline": "true"},
                 {"name": "", "value": f"{layout.hole_distances(3)[2]}", "inline": "true"},
                 {"name": "", "value": f"{layout.course_metadata()}", "inline": "false"},
-                {"name": "Calculated rating", "value": f"{layout.score_rating(score)}", "inline": "false"},
-            ]
+                {"name": "Calculated rating", "value": f"{layout.score_rating(score)['rating']}\n**Error:** +/- {layout.score_rating(score)['error']}", "inline": "false"},
+            ],
+            "footer": {
+                "text": f"Calculated from {len(layout.layouts_used())} tournament(s), {len(layout.rounds_used)} round",
+            }
         })
         for layout in grouped_layouts
     ]
-
-    author_id = inter.author.id 
-    await inter.response.send_message(embed=embeds[0], view=CreatePaginator(embeds, author_id), ephemeral=False) 
-    logging.info(f"User {author_id} requested ratings for {course_name}, {layout_name} with score {score}")
+    bot.logger.info(f"User {inter.author.name} requested ratings for {course_name}, {layout_name} with score {score}")
+    await inter.response.send_message(embed=embeds[0], view=CreatePaginator(embeds, author_id=inter.author.id, timeout=600)) 
 
 setup, teardown = plugin.create_extension_handlers()
