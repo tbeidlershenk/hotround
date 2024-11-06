@@ -33,11 +33,11 @@ async def get_ratings(
     scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
 
     # ERR: No close course matches
-    if len(scored_course_names) == 0 or scored_course_names[0][1] < 90:
+    if course_name not in [course for course, _ in scored_course_names]:
         similar_course_names = [course for course, _ in scored_course_names]
         await inter.response.send_message(embed=disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"No close matches for course '{course_name}'.",
+            "description": f"No matches for course '{course_name}'.",
             "color": 0x1491A0,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
