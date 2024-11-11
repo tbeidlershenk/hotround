@@ -5,6 +5,12 @@ import os
 import asyncio
 from util.database import Database
 import json
+from flask import Flask, jsonify
+
+uptime_app = Flask(__name__)
+@uptime_app.route('/')
+def home():
+    return jsonify({'status': 'online'})
 
 class CaddieBot(commands.InteractionBot):
     def __init__(self, config: dict, **options):
@@ -17,7 +23,6 @@ class CaddieBot(commands.InteractionBot):
         self.logger.info(f'Logged in as {self.user}')
 
 async def main():
-    dotenv.load_dotenv()
     bot_token = os.getenv("BOT_TOKEN")
     with open('bot_config.json') as config_file:
         config: dict = json.load(config_file)
@@ -50,4 +55,6 @@ async def main():
         await bot.close()
 
 if __name__ == "__main__":
+    dotenv.load_dotenv()
+    uptime_app.run(port=8080)
     asyncio.run(main())
