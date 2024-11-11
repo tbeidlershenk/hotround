@@ -7,6 +7,12 @@ from util.database import Database
 import json
 from flask import Flask, jsonify
 import threading
+from tendo import singleton
+
+try:
+    instance = singleton.SingleInstance() 
+except singleton.SingleInstanceException:
+    exit()
 
 uptime_app = Flask(__name__)
 log = logging.getLogger('werkzeug')
@@ -24,6 +30,7 @@ class CaddieBot(commands.InteractionBot):
         self.logger = logging.getLogger('disnake')
 
     async def on_ready(self):
+        self.logger.info(f'PID: {os.getpid()}')
         self.logger.info(f'Logged in as {self.user}')
 
 async def main():
@@ -59,12 +66,9 @@ async def main():
         await bot.close()
 
 def run_app():
-    uptime_app.run(port=5001)
-
-def run_bot():
-    asyncio.run(main())
+    uptime_app.run(port=8080)
 
 if __name__ == "__main__":
     dotenv.load_dotenv()
     threading.Thread(target=run_app).start()
-    threading.Thread(target=run_bot).start()
+    asyncio.run(main())
