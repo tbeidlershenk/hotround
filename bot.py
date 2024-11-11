@@ -8,6 +8,9 @@ import json
 from flask import Flask, jsonify
 
 uptime_app = Flask(__name__)
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 @uptime_app.route('/')
 def home():
     return jsonify({'status': 'online'})
@@ -56,6 +59,5 @@ async def main():
 
 if __name__ == "__main__":
     dotenv.load_dotenv()
-    uptime_app.logger.disabled = True
     uptime_app.run(port=8080)
     asyncio.run(main())
