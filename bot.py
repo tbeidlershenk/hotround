@@ -6,6 +6,7 @@ import asyncio
 from util.database import Database
 import json
 from flask import Flask, jsonify
+import threading
 
 uptime_app = Flask(__name__)
 log = logging.getLogger('werkzeug')
@@ -57,7 +58,13 @@ async def main():
         bot.logger.info('Logging out of session...')
         await bot.close()
 
+def run_app():
+    uptime_app.run(port=5001)
+
+def run_bot():
+    asyncio.run(main())
+
 if __name__ == "__main__":
     dotenv.load_dotenv()
-    uptime_app.run(port=8080)
-    asyncio.run(main())
+    threading.Thread(target=run_app).start()
+    threading.Thread(target=run_bot).start()
