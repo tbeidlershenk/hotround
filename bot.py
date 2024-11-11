@@ -56,5 +56,6 @@ async def main():
 
 if __name__ == "__main__":
     dotenv.load_dotenv()
+    uptime_app.logger.disabled = True
     uptime_app.run(port=8080)
     asyncio.run(main())
