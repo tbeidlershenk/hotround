@@ -3,9 +3,9 @@ from disnake.ext import commands
 import dotenv
 import os
 import asyncio
+from server import run_server
 from util.database import Database
 import json
-from flask import Flask, jsonify
 import threading
 from tendo import singleton
 
@@ -13,14 +13,6 @@ try:
     instance = singleton.SingleInstance() 
 except singleton.SingleInstanceException:
     exit()
-
-uptime_app = Flask(__name__)
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
-
-@uptime_app.route('/')
-def home():
-    return jsonify({'status': 'online'})
 
 class CaddieBot(commands.InteractionBot):
     def __init__(self, config: dict, **options):
@@ -65,10 +57,7 @@ async def main():
         bot.logger.info('Logging out of session...')
         await bot.close()
 
-def run_app():
-    uptime_app.run(port=8080)
-
 if __name__ == "__main__":
     dotenv.load_dotenv()
-    threading.Thread(target=run_app).start()
+    threading.Thread(target=run_server).start()
     asyncio.run(main())
