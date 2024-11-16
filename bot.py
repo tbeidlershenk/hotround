@@ -8,6 +8,7 @@ from util.database import Database
 import json
 import threading
 from tendo import singleton
+import sys
 
 try:
     instance = singleton.SingleInstance() 
@@ -15,10 +16,9 @@ except singleton.SingleInstanceException:
     exit()
 
 class CaddieBot(commands.InteractionBot):
-    def __init__(self, config: dict, **options):
+    def __init__(self, **options):
         super().__init__(**options)
-        self.database = Database(config['db_connection'])
-        self.debug: bool = config['debug']
+        self.database = Database(os.getenv('db_connection'))
         self.logger = logging.getLogger('disnake')
 
     async def on_ready(self):
@@ -26,11 +26,8 @@ class CaddieBot(commands.InteractionBot):
         self.logger.info(f'Logged in as {self.user}')
 
 async def main():
-    bot_token = os.getenv("BOT_TOKEN")
-    with open('bot_config.json') as config_file:
-        config: dict = json.load(config_file)
-
-    log_path = config['log_file']
+    bot_token = os.getenv("bot_token")
+    log_path = os.getenv('log_file')
     log_dir = os.path.dirname(log_path)
     log_file = os.path.basename(log_path)
     home_dir = os.path.expanduser("~")
@@ -44,7 +41,7 @@ async def main():
     log_file_handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
     bot_logger.addHandler(log_file_handler)
     
-    bot = CaddieBot(config) 
+    bot = CaddieBot() 
     bot.load_extensions("exts")
 
     try:
@@ -58,6 +55,17 @@ async def main():
         await bot.close()
 
 if __name__ == "__main__":
-    dotenv.load_dotenv()
+    if len(sys.argv) < 2:
+        print("Usage: python3 bot.py <config_file>")
+        sys.exit(1)
+
+    config_file_path = sys.argv[1]
+    with open(config_file_path) as config_file:
+        config: dict = json.load(config_file)
+    for key, value in config.items():
+        if value is None:
+            continue
+        os.environ[key] = str(value)
+    
     threading.Thread(target=run_server).start()
     asyncio.run(main())

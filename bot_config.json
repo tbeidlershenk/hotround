@@ -1,9 +1,0 @@
-{
-    "db_connection": "sqlite:///data/pdga_data.db",
-    "chromedriver_path": null,
-    "selenium_args": ["--headless", "--disable-gpu", "--window-size=1920,1080"],
-    "command_prefix": "!",
-    "log_file": "logs/caddiebot.log",
-    "invite_link": "https://discord.com/oauth2/authorize?client_id=1300645264591294475&permissions=8&integration_type=0&scope=bot",
-    "debug": true
-}

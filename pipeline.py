@@ -37,6 +37,7 @@ try:
     if config['events_json'] is not None:
         with open(config['events_json']) as f:
             course_events: dict = json.load(f)
+        course_events = {x: course_events[x] for x in course_names.keys()}
     else:
         course_events = [scraper.get_all_sanctioned_events(x, config['events_start']) for x in course_names.keys()]
 
@@ -53,9 +54,9 @@ try:
 
         for j, event in enumerate(events):
             event_id = event['event_id']
-            if database.event_exists(event_id):
-                logging.info(f'Skipping {event_id} (already scraped)...')
-                continue
+            # if database.event_exists(event_id):
+            #     logging.info(f'Skipping {event_id} (already scraped)...')
+            #     continue
 
             course_ratings = scraper.get_round_ratings_for_tournament(event_id)
             rounds.extend(course_ratings)

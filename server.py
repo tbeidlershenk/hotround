@@ -3,7 +3,6 @@ import os
 from flask import Flask, jsonify
 from pyngrok import ngrok
 from pyngrok import conf
-import dotenv
 
 uptime_app = Flask(__name__)
 
@@ -17,9 +16,11 @@ def configure_logging():
     log.setLevel(logging.CRITICAL+1)
 
 def run_server():
-    dotenv.load_dotenv()
+    ngrok_config = os.getenv("ngrok_config")
+    if ngrok_config is None:
+        return
     configure_logging()
-    port = int(os.getenv("PORT"))
-    conf.get_default().config_path = "ngrok_config.yml"
+    port = int(os.getenv("flask_port"))
+    conf.get_default().config_path = ngrok_config
     ngrok.connect(addr=port, name="caddiebot")
     uptime_app.run(port=port)

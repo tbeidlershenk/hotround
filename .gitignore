@@ -1,6 +1,7 @@
 # Files
 test/
 data/
+config/
 __pycache__/
 ratings.log
 .DS_Store
