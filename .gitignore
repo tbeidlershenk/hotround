@@ -9,6 +9,8 @@ ratings.log
 Pipfile
 .prettierrc
 *.db
+ngrok_config.yml
+update_pi_config.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,5 +1,5 @@
 import requests
-from logger import logger
+import logging
 import time
 
 def get_request_avoid_rate_limit(url: str, sleep_time: int = 60) -> requests.Response:
@@ -16,7 +16,7 @@ def get_request_avoid_rate_limit(url: str, sleep_time: int = 60) -> requests.Res
 
     response = requests.get(url)
     while response.status_code == 429:
-        logger.info(f'Rate limited. Waiting {sleep_time}s...')
+        logging.info(f'Rate limited. Waiting {sleep_time}s...')
         time.sleep(sleep_time)
         response = requests.get(url)
     response.raise_for_status()

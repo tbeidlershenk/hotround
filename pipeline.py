@@ -1,5 +1,5 @@
-# 1. Import and install requirements
-from logger import logger
+import logging
+import logging.handlers
 from util.database import Database
 from util.scraper import Scraper
 import json
@@ -7,6 +7,12 @@ import chromedriver_autoinstaller
 import time
 from time import sleep
 from tqdm import tqdm
+import sys
+
+logging.basicConfig(level=logging.INFO)
+stream_handler = logging.StreamHandler(stream=sys.stdout)
+stream_handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
+logging.getLogger().addHandler(stream_handler)
 
 # Load configuration
 with open('scraper_config.json') as f:
@@ -19,7 +25,7 @@ chromedriver_autoinstaller.install()
 
 # 4. Fetch ratings for each event and load into DB
 try:
-    logger.info('Fetching ratings...')
+    logging.info('Fetching ratings...')
     start_time = time.time()
 
     if config['courses_json'] is not None:
@@ -31,6 +37,7 @@ try:
     if config['events_json'] is not None:
         with open(config['events_json']) as f:
             course_events: dict = json.load(f)
+        course_events = {x: course_events[x] for x in course_names.keys()}
     else:
         course_events = [scraper.get_all_sanctioned_events(x, config['events_start']) for x in course_names.keys()]
 
@@ -40,20 +47,20 @@ try:
         elapsed_time_str = time.strftime('%H:%M:%S', time.gmtime(elapsed_time))
         est_time_remaining = elapsed_time / (i + 1) * (len(course_events) - i)
         est_time_str = f'{int(est_time_remaining // 3600):02}:{time.strftime("%M:%S", time.gmtime(est_time_remaining % 3600))}'
-        logger.info(f'Elapsed time: {elapsed_time_str} seconds, progress: {progress}, est. time remaining: {est_time_str}')
+        logging.info(f'Elapsed time: {elapsed_time_str} seconds, progress: {progress}, est. time remaining: {est_time_str}')
 
         events = course_events[course]
         rounds = []
 
         for j, event in enumerate(events):
             event_id = event['event_id']
-            if database.event_exists(event_id):
-                logger.info(f'Skipping {event_id} (already scraped)...')
-                continue
+            # if database.event_exists(event_id):
+            #     logging.info(f'Skipping {event_id} (already scraped)...')
+            #     continue
 
             course_ratings = scraper.get_round_ratings_for_tournament(event_id)
             rounds.extend(course_ratings)
-            logger.info(f'Event {j+1}/{len(events)} - Course {i+1}/{len(course_events)}')
+            logging.info(f'Event {j+1}/{len(events)} - Course {i+1}/{len(course_events)}')
 
         data = {
             'course_name': course,
@@ -65,9 +72,9 @@ try:
         
 
 except BaseException as e:
-    logger.info(f'Error fetching ratings: {e.with_traceback()}')
+    logging.info(f'Error fetching ratings: {e.with_traceback()}')
 except KeyboardInterrupt as e:
-    logger.info(f'Error fetching ratings: {e.with_traceback()}')
+    logging.info(f'Error fetching ratings: {e.with_traceback()}')
 
 scraper.cleanup()
-logger.info("Done")
+logging.info("Done")

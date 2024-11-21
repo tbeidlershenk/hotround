@@ -62,9 +62,9 @@ class Scraper:
                 courses = [x.get('href').replace('/courses/', '')
                         for x in course_link_elements]
                 all_courses += courses
-                logger.info(f'Fetched {len(courses)} courses for {location}')
+                self.logger.info(f'Fetched {len(courses)} courses for {location}')
             except Exception as e:
-                logger.info(f'Error fetching courses for {location}: {e}')
+                self.logger.info(f'Error fetching courses for {location}: {e}')
 
         return all_courses
 
@@ -84,10 +84,10 @@ class Scraper:
             course_name_element: HtmlElement = tree.xpath(
                 Consts.dgscene_course_name_header_xpath)[0]
             readable_name = course_name_element.text.strip()
-            logger.info(f'Fetched {readable_name} for {course_name}')
+            self.logger.info(f'Fetched {readable_name} for {course_name}')
             return readable_name
         except Exception as e:
-            logger.info(f'Error fetching readable name for {course_name}: {e}')
+            self.logger.info(f'Error fetching readable name for {course_name}: {e}')
             return course_name
 
 
@@ -117,7 +117,7 @@ class Scraper:
 
         for event_url in event_urls:
             try:
-                logger.info(f'Fetching data for: {event_url}')
+                self.logger.info(f'Fetching data for: {event_url}')
 
                 # request the dgscene event page
                 response = get_request_avoid_rate_limit(event_url)
@@ -155,13 +155,13 @@ class Scraper:
                         'event_id': event_id,
                         'date': date_str
                     })
-                    logger.info(f'Found event id: {event_id}')
+                    self.logger.info(f'Found event id: {event_id}')
 
             except Exception as e:
-                logger.info(f'Error: {e}')
-                logger.info(f'Skipping: {event_url}')
+                self.logger.info(f'Error: {e}')
+                self.logger.info(f'Skipping: {event_url}')
 
-            logger.info('')
+            self.logger.info('')
 
         return event_ids
 
@@ -193,7 +193,7 @@ class Scraper:
             rounds: list[str] = [x.text for x in tree.xpath(Consts.pdgalive_round_xpath)]
             rating_data = []
         except Exception as e:
-            logger.info(e)
+            self.logger.info(e)
             return []
 
         for division, round in product(divisions, rounds):
