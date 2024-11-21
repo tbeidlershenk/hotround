@@ -50,7 +50,7 @@ class Consts:
     pdgalive_round_course_metadata_xpath = '//div[contains(@class, "round-course-meta")]'
     pdgalive_round_course_metadata_text_xpath = pdgalive_round_course_metadata_xpath + '//text()'
     pdgalive_course_layout_xpath = '//div[i[contains(@class, "pi-course-layout")]]'
-    pdgalive_course_name_xpath = '//div[contains(@class, "course-string")]'
+    pdgalive_course_name_xpath = '//span[contains(@class, "event-name-main")]'
     pdgalive_layout_par_xpath = "//div[contains(@class, 'header-col') and contains(string(),'Tot')]//div[contains(@class, 'label-2')]"
     pdgalive_hole_layout_distance_xpath = "//div[contains(@class, 'hole-length')]"
     pdgalive_player_row_xpath = '//div[contains(@class, "table-row-content")]'

@@ -5,8 +5,6 @@ from models.course import Course
 from models.event import Event
 from models.round import Round
 from datetime import datetime
-from logger import logger
-from sqlalchemy.orm import joinedload
 
 class Database:
     def __init__(self, connection: str) -> None:
@@ -15,53 +13,57 @@ class Database:
         session = sessionmaker(bind=engine)
         self.session: Session = session()
 
-    def insert_course_data(self, data: dict) -> None:
-        course = Course(
-            course_name=data['course_name'],
-            readable_course_name=data['readable_course_name']
-        )
-        events = [
-            Event(
-                event_id=event['event_id'],
-                date=datetime.strptime(event['date'], '%d-%m-%Y'),
-                course_name=data['course_name'],
-            )
-            for event in data['events']
-        ]
-        rounds = [
-            Round(
-                layout_name=round['layout_name'],
-                round_number=round['round_number'],
-                num_players=round['num_players'],
-                layout_par=round['layout_par'],
-                layout_hole_distances=round['layout_hole_distances'],
-                layout_total_distance=round['layout_total_distance'],
-                high_rating=round['high_rating'],
-                low_rating=round['low_rating'],
-                par_rating=round['par_rating'],
-                stroke_value=round['stroke_value'],
-                event_id=round['event_id'],
-            )
-            for round in data['rounds']
-        ]
-        self.session.merge(course)
-        for event in events:
-            self.session.merge(event)
+    def merge_rounds(self, rounds: list[Round]) -> None:
         for round in rounds:
             self.session.merge(round)
 
         self.session.commit()
-        logger.info(f'Inserted course data for {data["course_name"]}')
-        return True
+
+    def merge_events(self, events: list[Event]) -> None:
+        for event in events:
+            self.session.merge(event)
+
+        self.session.commit()
+
+    def merge_data(self, course: Course, events: list[Event] = [], rounds: list[Round] = []) -> None:
+        self.session.merge(course)
+
+        for event in events:
+            self.session.merge(event)
+
+        for round in rounds:
+            self.session.merge(round)
+
+        self.session.commit()    
         
     def event_exists(self, event_id: int) -> bool:
         return self.session.query(Event).filter_by(event_id=event_id).first() is not None
         
-    def query_all_courses(self) -> list[Course]:
+    def event_contains_round_data(self, event_id: int) -> bool:
+        return self.session.query(Round).filter_by(event_id=event_id).first() is not None
+    
+    def delete_event(self, event_id: int) -> None:
+        self.session.query(Event).filter_by(event_id=event_id).delete()
+        self.session.commit()
+    
+    def query_courses(self) -> list[Course]:
         all_courses = self.session.query(Course).all()
         return all_courses
     
-    def query_all_course_rounds(self, readable_course_name: str) -> list[Round]:
+    def query_events(self) -> list[Event]:
+        all_events = self.session.query(Event).all()
+        return all_events
+    
+    def query_events_with_no_rounds(self) -> list[Event]:
+        subquery = self.session.query(Round.event_id).distinct()
+        events_no_rounds = (
+            self.session.query(Event)
+            .filter(Event.event_id.notin_(subquery))
+            .all()
+        )
+        return events_no_rounds
+    
+    def query_rounds_for_course(self, readable_course_name: str) -> list[Round]:
         course = self.session.query(Course).filter(Course.readable_course_name.ilike(readable_course_name)).first()
         
         if not course:

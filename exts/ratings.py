@@ -28,7 +28,7 @@ async def get_ratings(
         None
     """
     bot: CaddieBot = plugin.bot
-    all_course_names = [course.readable_course_name for course in bot.database.query_all_courses()]
+    all_course_names = [course.readable_course_name for course in bot.database.query_courses()]
     scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
 
     # ERR: No close course matches
@@ -50,12 +50,11 @@ async def get_ratings(
         }), ephemeral=False)
         return
     
-    course_name = scored_course_names[0][0]
-    rounds = bot.database.query_all_course_rounds(course_name)
+    rounds = bot.database.query_rounds_for_course(course_name)
     all_layout_names = set([round.layout_name for round in rounds])
     scored_layouts: tuple[str, int] = process.extractBests(layout_name, all_layout_names, scorer=fuzz.partial_token_sort_ratio, score_cutoff=0, limit=10)
 
-    # ERR: No sanctioned rounds
+    # ERROR: No sanctioned rounds
     if len(scored_layouts) == 0:
         await inter.response.send_message(embed=disnake.Embed.from_dict({
             "title": f"{course_name}, {layout_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
@@ -70,7 +69,7 @@ async def get_ratings(
         }), ephemeral=False)
         return
     
-    # ERR: No close layout matches
+    # ERROR: No close layout matches
     if scored_layouts[0][1] < 75:
         similar_layout_names = [layout for layout, _ in scored_layouts]
         await inter.response.send_message(embed=disnake.Embed.from_dict({

@@ -1,36 +1,27 @@
-import requests
-from bs4 import BeautifulSoup, Tag
-import time
-from logger import logger
-from util.requests import get_request_avoid_rate_limit
-from lxml import html
-from lxml.html import HtmlElement
-from typing import Any
-import requests
-from bs4 import BeautifulSoup, Tag
-import time
-from logger import logger
-from datetime import datetime
-from lxml import html
-from lxml.html import HtmlElement
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-import regex as re
-from util.consts import Consts
+import warnings
+warnings.filterwarnings("ignore")
+
 from bs4 import BeautifulSoup
-from logger import logger
 from lxml import html
 from lxml.html import HtmlElement
-from itertools import product
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from models.round import Round
+from util.consts import Consts
 from util.requests import get_request_avoid_rate_limit
+from datetime import datetime
+from itertools import product
+from logger import logger
+
+def try_parse_layout_hole_distances(layout_hole_distances: list[int]) -> list[int]:
+    try:
+        hole_count = len(layout_hole_distances[:-1])
+        return [int(x.text) for x in layout_hole_distances[:-1]]
+    except:
+        return [0 for _ in range(hole_count)]
 
 class Scraper:
     def __init__(self, chromedriver_path: str = None) -> None:
@@ -41,10 +32,8 @@ class Scraper:
         service = Service() if chromedriver_path is None else Service(chromedriver_path)
         self.driver = webdriver.Chrome(service=service, options=options)
 
-
     def cleanup(self) -> None:
         self.driver.quit()
-
 
     def get_courses_from_dgscene(self) -> list[str]:
         """
@@ -177,7 +166,7 @@ class Scraper:
         return event_ids
 
 
-    def get_round_ratings_for_tournament(self, event_id: int) -> list[dict[str, list]]:
+    def get_round_ratings_for_tournament(self, event_id: int) -> list[Round]:
         """
         Fetches and calculates round ratings for a given tournament event.
         Args:
@@ -198,7 +187,6 @@ class Scraper:
             self.driver.get(Consts.pdgalive_score_page_url.format(event_id=event_id))
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, Consts.pdgalive_division_picker_xpath)))
-
             soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             tree: HtmlElement = html.fromstring(str(soup))
             divisions: list[str] = [x.text for x in tree.xpath(Consts.pdgalive_division_xpath)]
@@ -211,8 +199,9 @@ class Scraper:
         for division, round in product(divisions, rounds):
             try:
                 round_number = int(round[3])
-                self.driver.get(Consts.pdgalive_score_page_specific_division_and_round_url.format(
-                    event_id=event_id, division=division, round_number=round_number))
+                pdga_live_url = Consts.pdgalive_score_page_specific_division_and_round_url.format(
+                    event_id=event_id, division=division, round_number=round_number)
+                self.driver.get(pdga_live_url)
                 WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, Consts.pdgalive_player_row_xpath)))
                 soup = BeautifulSoup(self.driver.page_source, 'html.parser')
@@ -225,10 +214,13 @@ class Scraper:
                 # get low, high rating and calculate average
                 layout_par = int(tree.xpath(Consts.pdgalive_layout_par_xpath)[0].text)
                 layout_distances = tree.xpath(Consts.pdgalive_hole_layout_distance_xpath)
-                layout_hole_distances = [int(x.text.replace('\'', '')) for x in layout_distances[:-1]]
                 layout_total_distance = int(layout_distances[-1].text.replace('\'', ''))
+                layout_hole_distances = try_parse_layout_hole_distances(layout_distances)
                 player_rows: list[HtmlElement] = [x for x in tree.xpath(
                     Consts.pdgalive_player_row_xpath) if 'DNF' not in x.text_content()]
+                num_players = len(player_rows)
+                if num_players <= 1:
+                    raise Exception(f'Not enough players ({num_players})')
 
                 # first player data
                 first_player_row: HtmlElement = player_rows[0]
@@ -249,24 +241,24 @@ class Scraper:
                 score_diff = float(last_player_score - first_player_score)
                 rating_diff = float(first_player_rating - last_player_rating)
                 stroke_value = rating_diff / score_diff
-                par_rating = int(last_player_rating +
-                                (last_player_score * stroke_value))
-                round_data = {
-                    'event_id': event_id,
-                    'course_name': course_name,
-                    'layout_name': course_layout,
-                    'round_number': round_number,
-                    'num_players': len(player_rows),
-                    'layout_par': layout_par,
-                    'layout_hole_distances': ', '.join([str(x) for x in layout_hole_distances]),
-                    'layout_total_distance': layout_total_distance,
-                    'high_rating': first_player_rating,
-                    'low_rating': last_player_rating,
-                    'stroke_value': stroke_value,
-                    'par_rating': par_rating
-                }
-                rating_data.append(round_data)
+                par_rating = int(last_player_rating + (last_player_score * stroke_value))
+                round = Round(
+                    event_id=event_id,
+                    layout_name=course_layout,
+                    round_number=round_number,
+                    num_players=num_players,
+                    layout_par=layout_par,
+                    layout_hole_distances=', '.join([str(x) for x in layout_hole_distances]),
+                    layout_total_distance=layout_total_distance,
+                    high_rating=first_player_rating,
+                    low_rating=last_player_rating,
+                    stroke_value=stroke_value,
+                    par_rating=par_rating
+                )
+                rating_data.append(round)
+                logger.info(f'Fetched new round: {pdga_live_url}')
             except Exception as e:
-                pass
+                logger.info(f'Error fetching round: {pdga_live_url}')
+                logger.info(f"Reason: {e}")
 
         return rating_data
