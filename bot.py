@@ -1,12 +1,9 @@
 import logging
 from disnake.ext import commands
-import dotenv
 import os
 import asyncio
-from server import run_server
+from util.configuration import load_config_into_env
 from util.database import Database
-import json
-import threading
 from tendo import singleton
 import sys
 
@@ -27,20 +24,8 @@ class CaddieBot(commands.InteractionBot):
 
 async def main():
     bot_token = os.getenv("bot_token")
-    log_path = os.getenv('log_file')
-    log_dir = os.path.dirname(log_path)
-    log_file = os.path.basename(log_path)
-    home_dir = os.path.expanduser("~")
-    log_dir = os.path.join(home_dir, log_dir)
-    log_path = os.path.join(log_dir, log_file)
-    os.makedirs(log_dir, exist_ok=True)
-
     bot_logger = logging.getLogger('disnake')
     bot_logger.setLevel(logging.INFO)
-    log_file_handler = logging.FileHandler(log_path, mode='a')
-    log_file_handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
-    bot_logger.addHandler(log_file_handler)
-    
     bot = CaddieBot() 
     bot.load_extensions("exts")
 
@@ -60,12 +45,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     config_file_path = sys.argv[1]
-    with open(config_file_path) as config_file:
-        config: dict = json.load(config_file)
-    for key, value in config.items():
-        if value is None:
-            continue
-        os.environ[key] = str(value)
-    
-    threading.Thread(target=run_server).start()
+    load_config_into_env(config_file_path)
     asyncio.run(main())

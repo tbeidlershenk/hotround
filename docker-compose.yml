@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+    flaskapp:
+        build:
+            context: .
+            dockerfile: Dockerfile.backend # This will use the first Python Dockerfile
+        ports:
+            - "5001:5001" # Adjust this to the actual port used in server.py
+        command: ["python3", "server.py", "config/dev.json"]
+
+    discordbot:
+        build:
+            context: .
+            dockerfile: Dockerfile.bot # This will use the second Python Dockerfile
+        command: ["python3", "bot.py", "config/dev.json"]
+
+    reactapp:
+        build:
+            context: .
+            dockerfile: Dockerfile.frontend # This will use the Node.js Dockerfile
+        ports:
+            - "80:80" # Adjust this to the actual port used by npm start
+        command: ["npm", "start"]
+
+volumes:
+    config:
+        driver: local

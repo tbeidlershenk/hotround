@@ -3,6 +3,7 @@ from models.base import Base
 from itertools import groupby
 import numpy as np
 from util.strings import to_pdgalive_link
+from logger import logger
 
 class Round(Base):
     __tablename__ = 'Rounds'
@@ -107,6 +108,7 @@ def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[L
         list[Layout]: A list of Layout objects, each representing a group of comparable rounds.
     """
     layout_groups: list[Layout] = []
+    logger.info(layout_groups)
     rounds.sort(key=lambda x: x.layout_par)
     for key, group in groupby(rounds, key=lambda r: int(r.layout_par)):
         group_list = remove_distance_outliers(list(group), threshold)

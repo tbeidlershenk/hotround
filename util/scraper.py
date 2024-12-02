@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from models.round import Round
+from models.event import Event
 from util.consts import Consts
 from util.requests import get_request_avoid_rate_limit
 from datetime import datetime
@@ -62,9 +63,9 @@ class Scraper:
                 courses = [x.get('href').replace('/courses/', '')
                         for x in course_link_elements]
                 all_courses += courses
-                self.logger.info(f'Fetched {len(courses)} courses for {location}')
+                logger.info(f'Fetched {len(courses)} courses for {location}')
             except Exception as e:
-                self.logger.info(f'Error fetching courses for {location}: {e}')
+                logger.info(f'Error fetching courses for {location}: {e}')
 
         return all_courses
 
@@ -84,23 +85,23 @@ class Scraper:
             course_name_element: HtmlElement = tree.xpath(
                 Consts.dgscene_course_name_header_xpath)[0]
             readable_name = course_name_element.text.strip()
-            self.logger.info(f'Fetched {readable_name} for {course_name}')
+            logger.info(f'Fetched {readable_name} for {course_name}')
             return readable_name
         except Exception as e:
-            self.logger.info(f'Error fetching readable name for {course_name}: {e}')
+            logger.info(f'Error fetching readable name for {course_name}: {e}')
             return course_name
 
 
-    def get_all_sanctioned_events(self, course_name: str, after_date: datetime = None) -> dict:
+    def get_all_sanctioned_events(self, course_name: str, after_date: datetime = None) -> list[Event]:
         """
         Fetches all sanctioned event IDs for a given course name from a specified date.
         Args:
             course_name (str): The name of the course to fetch events for.
-            after_date (datetime, optional): The date after which events should be considered. Defaults to None.
         Returns:
             list[int]: A list of sanctioned event IDs.
         Raises:
             Exception: If no PDGA results are found for an event.
+            after_date (datetime, optional): The date after which events should be considered. Defaults to None.
         """
         try:
             url = Consts.dgscene_course_events_url.format(course_name=course_name)
@@ -111,13 +112,13 @@ class Scraper:
                 Consts.dgscene_sanctioned_event_xpath)
             event_urls = [Consts.dgscene_base_url + event.get('href')
                         for event in sanctioned_events]
-            event_ids = []
+            events = []
         except:
             return []
 
         for event_url in event_urls:
             try:
-                self.logger.info(f'Fetching data for: {event_url}')
+                logger.info(f'Fetching data for: {event_url}')
 
                 # request the dgscene event page
                 response = get_request_avoid_rate_limit(event_url)
@@ -146,24 +147,25 @@ class Scraper:
 
                     # reached end of events since after_date
                     if after_date is not None and date < after_date:
-                        return event_ids
+                        return events
 
                     # get event id from pdga url
                     event_id = int(pdga_url.replace(
                         Consts.pdga_event_page_base_url, ''))
-                    event_ids.append({
-                        'event_id': event_id,
-                        'date': date_str
-                    })
-                    self.logger.info(f'Found event id: {event_id}')
+                    events.append(Event(
+                        event_id=event_id,
+                        course_name=course_name,
+                        date=date
+                    ))
+                    logger.info(f'Found event id: {event_id}')
 
             except Exception as e:
-                self.logger.info(f'Error: {e}')
-                self.logger.info(f'Skipping: {event_url}')
+                logger.info(f'Error: {e}')
+                logger.info(f'Skipping: {event_url}')
 
-            self.logger.info('')
+            logger.info('')
 
-        return event_ids
+        return events
 
 
     def get_round_ratings_for_tournament(self, event_id: int) -> list[Round]:
@@ -193,7 +195,7 @@ class Scraper:
             rounds: list[str] = [x.text for x in tree.xpath(Consts.pdgalive_round_xpath)]
             rating_data = []
         except Exception as e:
-            self.logger.info(e)
+            logger.info(e)
             return []
 
         for division, round in product(divisions, rounds):

@@ -1,4 +1,5 @@
 # Files
+node_modules/
 test/
 data/
 config/

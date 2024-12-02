@@ -50,6 +50,15 @@ class Database:
         all_courses = self.session.query(Course).all()
         return all_courses
     
+    def query_courses_with_no_events(self) -> list[Course]:
+        subquery = self.session.query(Event.course_name).distinct()
+        courses_no_events = (
+            self.session.query(Course)
+            .filter(Course.course_name.notin_(subquery))
+            .all()
+        )
+        return courses_no_events
+    
     def query_events(self) -> list[Event]:
         all_events = self.session.query(Event).all()
         return all_events
