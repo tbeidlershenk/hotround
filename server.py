@@ -1,7 +1,7 @@
 import sys
 import os
 from fuzzywuzzy import process, fuzz
-from flask import Flask, jsonify
+from server import Flask, jsonify
 from flask_cors import CORS
 from pyngrok import ngrok
 from pyngrok import conf
