@@ -3,6 +3,7 @@ from models.base import Base
 from itertools import groupby
 import numpy as np
 from util.strings import to_pdgalive_link
+from logger import logger
 
 class Round(Base):
     __tablename__ = 'Rounds'
@@ -18,6 +19,22 @@ class Round(Base):
     par_rating = Column(Integer, nullable=False)
     stroke_value = Column(DECIMAL(5, 2), nullable=False)
     event_id = Column(Integer, ForeignKey('Events.event_id', ondelete='CASCADE'), nullable=False)
+
+    def to_dict(self):
+        return {
+            "round_id": self.round_id,
+            "layout_name": self.layout_name,
+            "round_number": self.round_number,
+            "num_players": self.num_players,
+            "layout_par": self.layout_par,
+            "layout_hole_distances": self.layout_hole_distances,
+            "layout_total_distance": self.layout_total_distance,
+            "high_rating": self.high_rating,
+            "low_rating": self.low_rating,
+            "par_rating": self.par_rating,
+            "stroke_value": self.stroke_value,
+            "event_id": self.event_id
+        }
 
 class Layout:
     def __init__(self, layout_hole_distances: list[int], layout_total_distance: int, layout_par: int, layout_names: list[str], rounds_used: list[Round]):
@@ -53,6 +70,15 @@ class Layout:
     
     def course_metadata(self) -> str:
         return (f"Par {self.layout_par}, Distance {self.layout_total_distance} feet")
+    
+    def to_dict(self) -> dict:
+        return {
+            "layout_hole_distances": self.layout_hole_distances,
+            "layout_total_distance": self.layout_total_distance,
+            "layout_par": self.layout_par,
+            "layout_names": self.layout_names,
+            "rounds_used": [x.to_dict() for x in self.rounds_used]
+        }
 
 def remove_distance_outliers(rounds: list[Round], threshold: int):
     distances = np.array([round.layout_total_distance for round in rounds])
@@ -82,6 +108,7 @@ def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[L
         list[Layout]: A list of Layout objects, each representing a group of comparable rounds.
     """
     layout_groups: list[Layout] = []
+    logger.info(layout_groups)
     rounds.sort(key=lambda x: x.layout_par)
     for key, group in groupby(rounds, key=lambda r: int(r.layout_par)):
         group_list = remove_distance_outliers(list(group), threshold)

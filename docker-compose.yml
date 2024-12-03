@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+    flaskserver:
+        build:
+            context: .
+            dockerfile: Dockerfile.flaskserver
+        ports:
+            - "5001:5000"
+        command: ["python3", "flask.py", "config/prod.json"]
+
+    discordbot:
+        build:
+            context: .
+            dockerfile: Dockerfile.discordbot
+        command: ["python3", "bot.py", "config/prod.json"]
+
+    reactapp:
+        build:
+            context: .
+            dockerfile: Dockerfile.reactapp
+        ports:
+            - "8080:80"
+
+volumes:
+    config:
+        driver: local

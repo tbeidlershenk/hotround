@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+Dockerfile*
+.dockerignore
+.git
+.gitignore
+.env
+.DS_Store
+__pycache__/
+LICENSE
+venv
+*.ipynb
+*.png
+*.md
+*.yml

@@ -1,7 +1,9 @@
 # Files
+node_modules/
 test/
 data/
 config/
+scripts/
 __pycache__/
 ratings.log
 .DS_Store
@@ -132,9 +134,6 @@ venv.bak/
 
 # Rope project settings
 .ropeproject
-
-# mkdocs documentation
-/site
 
 # mypy
 .mypy_cache/
