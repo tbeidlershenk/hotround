@@ -1,0 +1,9 @@
+FROM node:lts-alpine as builder
+WORKDIR /app
+COPY frontend/package.json .
+RUN npm install
+ADD frontend .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html

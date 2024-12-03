@@ -7,6 +7,9 @@ Dockerfile*
 .env
 .DS_Store
 __pycache__/
-*.md
 LICENSE
 venv
+*.ipynb
+*.png
+*.md
+*.yml

@@ -1,7 +1,6 @@
-import logging
 import sys
-from fuzzywuzzy import process, fuzz
 import os
+from fuzzywuzzy import process, fuzz
 from flask import Flask, jsonify
 from flask_cors import CORS
 from pyngrok import ngrok
@@ -14,7 +13,8 @@ from waitress import serve
 from logger import logger
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all routes and origins
+CORS(app)
+# CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all routes and origins
 
 class ErrorCode(Enum):
     SUCCESS = 0
@@ -82,28 +82,12 @@ def get_rating(course_name: str, layout_name: str, score: str):
     grouped_layouts = group_comparable_rounds(matching_rounds)
     chosen_layout = grouped_layouts[0]
     score_rating = chosen_layout.score_rating(score_int)['rating']
-    logger.info(f"Calculated rating for {score} at [{course_name}: {layout_name}] - {score_rating}")
+    logger.info(f"Rated {score} at [{course_name}: {layout_name}] - {score_rating}")
     return jsonify({
         "status": ErrorCode.SUCCESS.value,
         "score_rating": score_rating,
         "layout": chosen_layout.to_dict(),
     }), 200
-
-def configure_logging():
-    app.logger.setLevel(logging.CRITICAL+1)
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.CRITICAL+1)
-
-def run_server():
-    port = int(os.getenv("flask_port"))
-    ngrok_config = os.getenv("ngrok_config")
-    if ngrok_config != None:   
-        configure_logging()     
-        conf.get_default().config_path = ngrok_config
-        ngrok.connect(addr=port, name="caddiebot")
-        serve(app, port=port)
-    else:
-        serve(app, port=port)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -113,4 +97,4 @@ if __name__ == "__main__":
     config_file_path = sys.argv[1]
     load_config_into_env(config_file_path)
     db = Database(os.getenv("db_connection"))
-    run_server()
+    serve(app, host='0.0.0.0', port=5000)
