@@ -6,16 +6,27 @@ services:
         ports:
             - "5001:5000"
         command: ["python3", "server.py", "config/prod.json"]
+        networks:
+            - appnet
 
     discordbot:
         build:
             context: .
             dockerfile: Dockerfile.discordbot
         command: ["python3", "bot.py", "config/prod.json"]
+        networks:
+            - appnet
 
     reactapp:
         build:
             context: .
             dockerfile: Dockerfile.reactapp
         ports:
-            - "8080:80"
+            - "80:80"
+            - "443:443"
+        networks:
+            - appnet
+
+networks:
+    appnet:
+        driver: bridge
