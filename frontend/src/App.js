@@ -20,7 +20,7 @@ function App() {
         const { courseName, layoutName, score } = formData;
 
         try {
-            const response = await fetch(`http://localhost:5001/rating/${courseName}/${layoutName}/${score}`, { method: "GET" });
+            const response = await fetch(`/rating/${courseName}/${layoutName}/${score}`, { method: "GET" });
             const data = await response.json();
 
             setResults(data);

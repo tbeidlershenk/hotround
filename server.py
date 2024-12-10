@@ -97,4 +97,4 @@ if __name__ == "__main__":
     config_file_path = sys.argv[1]
     load_config_into_env(config_file_path)
     db = Database(os.getenv("db_connection"))
-    serve(app, host='0.0.0.0', port=5000)
+    serve(app, host='0.0.0.0', port=5001)

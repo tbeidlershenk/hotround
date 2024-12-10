@@ -4,7 +4,7 @@ services:
             context: .
             dockerfile: Dockerfile.flaskserver
         ports:
-            - "5001:5000"
+            - "5001:5001"
         command: ["python3", "server.py", "config/prod.json"]
         networks:
             - appnet
