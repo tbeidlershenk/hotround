@@ -1,7 +1,7 @@
 import sys
 import os
 from fuzzywuzzy import process, fuzz
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from pyngrok import ngrok
 from pyngrok import conf
@@ -12,7 +12,7 @@ from enum import Enum
 from waitress import serve
 from logger import logger
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend/build', static_url_path='/')
 CORS(app)
 # CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all routes and origins
 
@@ -24,7 +24,7 @@ class ErrorCode(Enum):
 
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify(message="Online", status=200)
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/rating/<course_name>/<layout_name>/<score>', methods=['GET'])
 def get_rating(course_name: str, layout_name: str, score: str):
