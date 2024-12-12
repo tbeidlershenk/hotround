@@ -4,29 +4,11 @@ services:
             context: .
             dockerfile: Dockerfile.flaskserver
         ports:
-            - "5001:5001"
-        command: ["python3", "server.py", "config/prod.json"]
-        networks:
-            - appnet
+            - "80:80"
+        command: ["python3", "src/server.py", "config/prod.json"]
 
     discordbot:
         build:
             context: .
             dockerfile: Dockerfile.discordbot
-        command: ["python3", "bot.py", "config/prod.json"]
-        networks:
-            - appnet
-
-    reactapp:
-        build:
-            context: .
-            dockerfile: Dockerfile.reactapp
-        ports:
-            - "80:80"
-            - "443:443"
-        networks:
-            - appnet
-
-networks:
-    appnet:
-        driver: bridge
+        command: ["python3", "src/bot.py", "config/prod.json"]

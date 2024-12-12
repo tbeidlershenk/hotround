@@ -20,9 +20,8 @@ function App() {
         const { courseName, layoutName, score } = formData;
 
         try {
-            const response = await fetch(`/rating/${courseName}/${layoutName}/${score}`, { method: "GET" });
+            const response = await fetch(`/api/rating/${courseName}/${layoutName}/${score}`, { method: "GET" });
             const data = await response.json();
-
             setResults(data);
         } catch (error) {
             console.error("Error fetching ratings:", error);
@@ -84,6 +83,7 @@ function App() {
                                 onChange={handleInputChange}
                                 fullWidth
                                 margin="normal"
+                                required
                                 sx={{ backgroundColor: "white", borderRadius: 2 }}
                             />
                             <TextField
@@ -93,6 +93,7 @@ function App() {
                                 onChange={handleInputChange}
                                 fullWidth
                                 margin="normal"
+                                required
                                 sx={{ backgroundColor: "white", borderRadius: 2 }}
                             />
                             <TextField
@@ -103,6 +104,7 @@ function App() {
                                 onChange={handleInputChange}
                                 fullWidth
                                 margin="normal"
+                                required
                                 sx={{ backgroundColor: "white", borderRadius: 2 }}
                             />
                             <Button

@@ -3,7 +3,6 @@ import aiohttp
 import disnake
 import disnake_plugins
 from disnake.ext.commands import Context
-from bot import CaddieBot
 
 plugin = disnake_plugins.Plugin()
 
