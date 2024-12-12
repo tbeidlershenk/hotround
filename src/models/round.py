@@ -43,7 +43,7 @@ class Layout:
         self.layout_par = layout_par
         self.layout_names = layout_names
         self.rounds_used = rounds_used
-    
+
     def score_rating(self, score: int) -> dict:
         par_ratings = [x.par_rating for x in self.rounds_used]
         par_rating = int(np.mean(par_ratings))
@@ -68,6 +68,10 @@ class Layout:
             hole_columns.append('\n'.join([f"H{start+hole+1}: {dist}" for hole, dist in enumerate(holes)]))
         return hole_columns
     
+    def calculate_variance(self) -> int:
+        distances = [round.layout_total_distance for round in self.rounds_used]
+        return int(np.std(distances))
+    
     def course_metadata(self) -> str:
         return (f"Par {self.layout_par}, Distance {self.layout_total_distance} feet")
     
@@ -80,7 +84,7 @@ class Layout:
             "rounds_used": [x.to_dict() for x in self.rounds_used]
         }
 
-def remove_distance_outliers(rounds: list[Round], threshold: int):
+def remove_distance_outliers(rounds: list[Round], threshold: int) -> list:
     distances = np.array([round.layout_total_distance for round in rounds])
     upper_quartile = np.percentile(distances, 75)
     lower_quartile = np.percentile(distances, 25)
@@ -89,7 +93,7 @@ def remove_distance_outliers(rounds: list[Round], threshold: int):
     filtered_rounds = [round for round in rounds if quartile_set[0] <= round.layout_total_distance <= quartile_set[1]]
     return filtered_rounds
 
-def remove_rating_outliers(rounds: list[Round], threshold: int = 5):
+def remove_rating_outliers(rounds: list[Round], threshold: int = 5) -> list:
     ratings = np.array([round.par_rating for round in rounds])
     upper_quartile = np.percentile(ratings, 75)
     print(upper_quartile)
@@ -108,16 +112,23 @@ def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[L
         list[Layout]: A list of Layout objects, each representing a group of comparable rounds.
     """
     layout_groups: list[Layout] = []
-    logger.info(layout_groups)
     rounds.sort(key=lambda x: x.layout_par)
     for key, group in groupby(rounds, key=lambda r: int(r.layout_par)):
-        group_list = remove_distance_outliers(list(group), threshold)
-        str_hole_dists = [r.layout_hole_distances.split(', ') for r in group_list]
+        group_list = list(group)
+        group_list = remove_distance_outliers(group_list, threshold)
+        if len(group_list) == 0:
+            continue
+
+        str_hole_dists = [r.layout_hole_distances.split(', ') for r in group_list if ',' in r.layout_hole_distances]
         hole_dists = [[int(x) for x in y] for y in str_hole_dists]
         averaged_hole_dists = []
         for i in range(len(hole_dists[0])):
-            average_hole_dist = int(np.mean([hole_dists[j][i] for j in range(len(hole_dists))]))
-            averaged_hole_dists.append(average_hole_dist)
+            try:
+                average_hole_dist = int(np.mean([hole_dists[j][i] for j in range(len(hole_dists))]))
+                averaged_hole_dists.append(average_hole_dist)
+            except:
+                #literally hacks everywhere, ill fix this oneday
+                continue
 
         layout = Layout(
             averaged_hole_dists,
@@ -133,5 +144,7 @@ def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[L
         # else, add it
         layout_groups.append(layout)
 
+    # also bit of a hack
+    layout_groups = [layout for layout in layout_groups if layout.calculate_variance() <= 300]
     layout_groups.sort(key=lambda x: len(x.rounds_used), reverse=True)
     return layout_groups

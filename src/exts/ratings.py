@@ -2,11 +2,11 @@ import datetime
 import disnake
 import disnake_plugins
 from disnake.ext import commands
-from bot import CaddieBot
 from fuzzywuzzy import fuzz, process
 from logger import logger
 from models.round import group_comparable_rounds
 from Paginator import CreatePaginator
+from bot import CaddieBot
 
 plugin = disnake_plugins.Plugin()
 NEWLINE = '\n'

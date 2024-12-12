@@ -1,7 +1,17 @@
+FROM node:lts-alpine as site
+WORKDIR /app/site
+COPY site/package.json .
+RUN npm install
+ADD site/ .
+RUN npm run build
+
 FROM python:3.9-slim
 WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-COPY . .
+COPY --from=site /app/site/ ./site
+ADD src/ ./src
+ADD data/ ./data
+ADD config/ ./config
 EXPOSE 80
-CMD ["python3", "server.py", "config/dev.json"]
+CMD ["python3", "src/server.py", "config/dev.json"]

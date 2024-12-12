@@ -16,8 +16,9 @@ class CaddieBot(commands.InteractionBot):
 
 async def main():
     bot_token = os.getenv("bot_token")
-    bot = CaddieBot() 
-    bot.load_extensions("exts")
+    bot = CaddieBot()
+    bot.load_extension('exts.ratings', package='exts')
+    bot.load_extension('exts.status', package='exts')
 
     try:
         await bot.start(bot_token)

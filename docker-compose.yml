@@ -5,10 +5,10 @@ services:
             dockerfile: Dockerfile.flaskserver
         ports:
             - "80:80"
-        command: ["python3", "server.py", "config/prod.json"]
+        command: ["python3", "src/server.py", "config/prod.json"]
 
     discordbot:
         build:
             context: .
             dockerfile: Dockerfile.discordbot
-        command: ["python3", "bot.py", "config/prod.json"]
+        command: ["python3", "src/bot.py", "config/prod.json"]
