@@ -5,7 +5,7 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from pyngrok import ngrok
 from pyngrok import conf
-from models.round import group_comparable_rounds
+from models.round import AggregateLayout, Round, group_comparable_rounds
 from util.configuration import load_config_into_env
 from util.database import Database
 from enum import Enum
@@ -27,7 +27,8 @@ def home():
     return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/api/rating/<course_name>/<layout_name>/<score>', methods=['GET'])
-def get_rating(course_name: str, layout_name: str, score: str):
+def rating(course_name: str, layout_name: str, score: str):
+    db = Database(os.getenv("db_connection"))
     score_int = int(score)
     all_course_names = [course.readable_course_name for course in db.query_courses()]
     scored_course_names: tuple[str, int] = process.extractBests(
@@ -42,6 +43,7 @@ def get_rating(course_name: str, layout_name: str, score: str):
     # ERROR: No close course matches
     if len(scored_course_names) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - no close course matches")
+        db.close()
         return jsonify({
             "status": ErrorCode.ERROR_NO_MATCHES.value,
             "close_courses": [],
@@ -64,6 +66,7 @@ def get_rating(course_name: str, layout_name: str, score: str):
     # ERROR: No close layout matches
     if len(matching_layout_scores) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - no close layout matches")
+        db.close()
         return jsonify({
             "status": ErrorCode.ERROR_NO_LAYOUTS.value,
             "close_layouts": list(all_layout_names)[:10],
@@ -75,6 +78,7 @@ def get_rating(course_name: str, layout_name: str, score: str):
     # ERROR: No rounds for layout
     if len(matching_rounds) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - no rounds for layout")
+        db.close()
         return jsonify({
             "status": ErrorCode.ERROR_NO_ROUNDS.value,
             "close_layouts": matching_layout_names,
@@ -83,19 +87,56 @@ def get_rating(course_name: str, layout_name: str, score: str):
     grouped_layouts = group_comparable_rounds(matching_rounds)
     if len(grouped_layouts) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - layouts could not be grouped")
-        return jsonify({
-            "status": ErrorCode.ERROR_NO_LAYOUTS.value,
-            "close_layouts": list(all_layout_names)[:10],
-        }), 200
+        db.close()
+        return jsonify({}), 200
 
     chosen_layout = grouped_layouts[0]
     score_rating = chosen_layout.score_rating(score_int)['rating']
     logger.info(f"Rated {score} at [{course_name}: {layout_name}] - {score_rating}")
-    return jsonify({
-        "status": ErrorCode.SUCCESS.value,
-        "score_rating": score_rating,
-        "layout": chosen_layout.to_dict(),
-    }), 200
+    db.close()
+    return jsonify(build_success_data()), 200
+
+@app.route('/api/courses', methods=['GET'])
+def courses():
+    db = Database(os.getenv("db_connection"))
+    courses = db.query_courses()
+    db.close()
+    return jsonify([course.readable_course_name for course in courses])
+
+@app.route('/api/layouts/<course_name>', methods=['GET'])
+def layouts(course_name: str):
+    db = Database(os.getenv("db_connection"))
+    rounds = db.query_rounds_for_course(course_name)
+    layout_names = list(set([round.layout_name for round in rounds]))
+    db.close()
+    return jsonify(layout_names)
+
+def build_success_data(course_name: str, layout_name: str, score: int, rating: int, layout: AggregateLayout, rounds: list[Round]) -> dict:
+    return {
+        "course_name": course_name,
+        "layout_name": layout_name,
+        "score": score,
+        "score_rating": rating,
+        "layout": {
+            "layout_hole_distances": [
+            {
+                "hole_number": num+1,
+                "distance": dist
+            }
+            for num, dist in enumerate(layout.layout_hole_distances)],
+            "layout_total_distance": layout.layout_total_distance,
+            "layout_par": layout.layout_par,
+            "layouts": layout.layouts_to_url(),
+        },
+        "rounds": [
+            {
+                "round_date": 0,
+                "num_rounds": 0,
+                "round_rating": 0,
+            }
+        ],
+        "percentile": 0
+    }
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -104,5 +145,4 @@ if __name__ == "__main__":
 
     config_file_path = sys.argv[1]
     load_config_into_env(config_file_path)
-    db = Database(os.getenv("db_connection"))
     serve(app, host='0.0.0.0', port=80)

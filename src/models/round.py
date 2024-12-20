@@ -2,18 +2,15 @@ from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey
 from models.base import Base
 from itertools import groupby
 import numpy as np
+from models.layout import Layout
 from util.strings import to_pdgalive_link
 from logger import logger
 
 class Round(Base):
     __tablename__ = 'Rounds'
     round_id = Column(Integer, primary_key=True, autoincrement=True)
-    layout_name = Column(String(200), nullable=False)
     round_number = Column(Integer, nullable=False)
     num_players = Column(Integer, nullable=False)
-    layout_par = Column(Integer, nullable=False)
-    layout_hole_distances = Column(String(200), nullable=False)
-    layout_total_distance = Column(Integer, nullable=False)
     high_rating = Column(Integer, nullable=False)
     low_rating = Column(Integer, nullable=False)
     par_rating = Column(Integer, nullable=False)
@@ -23,12 +20,8 @@ class Round(Base):
     def to_dict(self):
         return {
             "round_id": self.round_id,
-            "layout_name": self.layout_name,
             "round_number": self.round_number,
             "num_players": self.num_players,
-            "layout_par": self.layout_par,
-            "layout_hole_distances": self.layout_hole_distances,
-            "layout_total_distance": self.layout_total_distance,
             "high_rating": self.high_rating,
             "low_rating": self.low_rating,
             "par_rating": self.par_rating,
@@ -36,12 +29,9 @@ class Round(Base):
             "event_id": self.event_id
         }
 
-class Layout:
-    def __init__(self, layout_hole_distances: list[int], layout_total_distance: int, layout_par: int, layout_names: list[str], rounds_used: list[Round]):
-        self.layout_hole_distances = layout_hole_distances
-        self.layout_total_distance = layout_total_distance
-        self.layout_par = layout_par
-        self.layout_names = layout_names
+class AggregateLayout:
+    def __init__(self, rounds_used: list[Round], layouts_used: list[Layout]):
+        self.layouts_used = layouts_used
         self.rounds_used = rounds_used
 
     def score_rating(self, score: int) -> dict:
@@ -53,11 +43,19 @@ class Layout:
             "error": int(np.std(par_ratings))
         }
 
-    def layouts_used(self) -> list[str]:
+    def layout_links(self) -> list[str]:
         self.rounds_used.sort(key=lambda x: x.event_id)
         grouped_layouts: groupby[int, list[Round]] = groupby(self.rounds_used, key=lambda r: r.event_id)        
         return [f"[{list(rounds)[0].layout_name}]({to_pdgalive_link(event_id)})" for event_id, rounds in grouped_layouts]
     
+    def layouts_to_url(self) -> list[dict]:
+        self.rounds_used.sort(key=lambda x: x.event_id)
+        grouped_layouts: groupby[int, list[Round]] = groupby(self.rounds_used, key=lambda r: r.event_id)        
+        return [{
+            "layout_name": list(rounds)[0].layout_name, 
+            "pdga_live_link": to_pdgalive_link(event_id)
+        } for event_id, rounds in grouped_layouts]
+
     def hole_distances(self, columns: int = 3) -> list[str]:
         holes_per_column = (len(self.layout_hole_distances) // columns)
         holes_per_column += 1 if len(self.layout_hole_distances) % columns != 0 else 0
@@ -103,7 +101,7 @@ def remove_rating_outliers(rounds: list[Round], threshold: int = 5) -> list:
     filtered_rounds = [round for round in rounds if quartile_set[0] <= round.par_rating <= quartile_set[1]]
     return filtered_rounds
 
-def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[Layout]:
+def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[AggregateLayout]:
     """
     Groups rounds into comparable layouts based on their hole distances, total distance, and par.
     Args:
@@ -111,7 +109,7 @@ def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[L
     Returns:
         list[Layout]: A list of Layout objects, each representing a group of comparable rounds.
     """
-    layout_groups: list[Layout] = []
+    layout_groups: list[AggregateLayout] = []
     rounds.sort(key=lambda x: x.layout_par)
     for key, group in groupby(rounds, key=lambda r: int(r.layout_par)):
         group_list = list(group)
@@ -130,7 +128,7 @@ def group_comparable_rounds(rounds: list[Round], threshold: int = 0.5) -> list[L
                 #literally hacks everywhere, ill fix this oneday
                 continue
 
-        layout = Layout(
+        layout = AggregateLayout(
             averaged_hole_dists,
             int(np.mean([r.layout_total_distance for r in group_list])),
             key, 

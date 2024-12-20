@@ -106,7 +106,7 @@ async def get_ratings(
             },
             "fields": [
                 {"name": "Layouts used", "value": "", "inline": "false"},
-                {"name": "", "value": f"{NEWLINE.join(layout.layouts_used()[:5])}", "inline": "false"},
+                {"name": "", "value": f"{NEWLINE.join(layout.layout_links()[:5])}", "inline": "false"},
                 {"name": "", "value": f"{layout.course_metadata()}", "inline": "false"},
                 {"name": "", "value": f"{layout.hole_distances(3)[0]}", "inline": "true"},
                 {"name": "", "value": f"{layout.hole_distances(3)[1]}", "inline": "true"},
@@ -114,7 +114,7 @@ async def get_ratings(
                 {"name": "", "value": f"Calculated rating: **{layout.score_rating(score)['rating']}**", "inline": "false"},
             ],
             "footer": {
-                "text": f"From {len(layout.layouts_used())} tournament(s), {len(layout.rounds_used)} round",
+                "text": f"From {len(layout.layout_links())} tournament(s), {len(layout.rounds_used)} round",
             }
         })
         for layout in grouped_layouts
