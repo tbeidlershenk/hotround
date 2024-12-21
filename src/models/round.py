@@ -58,6 +58,14 @@ class Layout:
         grouped_layouts: groupby[int, list[Round]] = groupby(self.rounds_used, key=lambda r: r.event_id)        
         return [f"[{list(rounds)[0].layout_name}]({to_pdgalive_link(event_id)})" for event_id, rounds in grouped_layouts]
     
+    def layouts_to_url(self) -> list[dict]:
+        self.rounds_used.sort(key=lambda x: x.event_id)
+        grouped_layouts: groupby[int, list[Round]] = groupby(self.rounds_used, key=lambda r: r.event_id)        
+        return [{
+            "layout_name": list(rounds)[0].layout_name, 
+            "pdga_live_link": to_pdgalive_link(event_id)
+        } for event_id, rounds in grouped_layouts]
+    
     def hole_distances(self, columns: int = 3) -> list[str]:
         holes_per_column = (len(self.layout_hole_distances) // columns)
         holes_per_column += 1 if len(self.layout_hole_distances) % columns != 0 else 0

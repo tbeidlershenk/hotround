@@ -1,3 +1,6 @@
+from datetime import datetime
+import json
+from pickle import NONE
 import sys
 import os
 from fuzzywuzzy import process, fuzz
@@ -5,7 +8,8 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from pyngrok import ngrok
 from pyngrok import conf
-from models.round import group_comparable_rounds
+from exts import status
+from models.round import Layout, Round, group_comparable_rounds
 from util.configuration import load_config_into_env
 from util.database import Database
 from enum import Enum
@@ -15,19 +19,35 @@ from logger import logger
 app = Flask(__name__, static_folder='../site/build', static_url_path='/')
 CORS(app)
 
-class ErrorCode(Enum):
-    SUCCESS = 0
-    ERROR_NO_MATCHES = 1
-    ERROR_NO_LAYOUTS = 2
-    ERROR_NO_ROUNDS = 3
+status_none = -1
+status_success = 0
+status_error_no_matches = 1
+status_error_no_layouts = 2
+status_error_no_rounds = 3
 
 @app.route('/', methods=['GET'])
 def home():
     logger.info("Loaded home page")
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/api/courses', methods=['GET'])
+def courses():
+    db = Database(os.getenv("db_connection"))
+    courses = db.query_courses()
+    db.close()
+    return jsonify([course.readable_course_name for course in courses])
+
+@app.route('/api/layouts/<course_name>', methods=['GET'])
+def layouts(course_name: str):
+    db = Database(os.getenv("db_connection"))
+    rounds = db.query_rounds_for_course(course_name)
+    layout_names = list(set([round.layout_name for round in rounds]))
+    db.close()
+    return jsonify(layout_names)
+
 @app.route('/api/rating/<course_name>/<layout_name>/<score>', methods=['GET'])
-def get_rating(course_name: str, layout_name: str, score: str):
+def rating(course_name: str, layout_name: str, score: str):
+    db = Database(os.getenv("db_connection"))
     score_int = int(score)
     all_course_names = [course.readable_course_name for course in db.query_courses()]
     scored_course_names: tuple[str, int] = process.extractBests(
@@ -43,7 +63,7 @@ def get_rating(course_name: str, layout_name: str, score: str):
     if len(scored_course_names) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - no close course matches")
         return jsonify({
-            "status": ErrorCode.ERROR_NO_MATCHES.value,
+            "status": status_error_no_matches,
             "close_courses": [],
         }), 200
     
@@ -65,7 +85,7 @@ def get_rating(course_name: str, layout_name: str, score: str):
     if len(matching_layout_scores) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - no close layout matches")
         return jsonify({
-            "status": ErrorCode.ERROR_NO_LAYOUTS.value,
+            "status": status_error_no_layouts,
             "close_layouts": list(all_layout_names)[:10],
         }), 200
     
@@ -76,7 +96,7 @@ def get_rating(course_name: str, layout_name: str, score: str):
     if len(matching_rounds) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - no rounds for layout")
         return jsonify({
-            "status": ErrorCode.ERROR_NO_ROUNDS.value,
+            "status": status_error_no_rounds,
             "close_layouts": matching_layout_names,
         }), 200
     
@@ -84,18 +104,51 @@ def get_rating(course_name: str, layout_name: str, score: str):
     if len(grouped_layouts) == 0:
         logger.info(f"Failed to calculate rating for {score} at [{course_name}: {layout_name}] - layouts could not be grouped")
         return jsonify({
-            "status": ErrorCode.ERROR_NO_LAYOUTS.value,
+            "status": status_error_no_layouts,
             "close_layouts": list(all_layout_names)[:10],
         }), 200
 
     chosen_layout = grouped_layouts[0]
     score_rating = chosen_layout.score_rating(score_int)['rating']
-    logger.info(f"Rated {score} at [{course_name}: {layout_name}] - {score_rating}")
-    return jsonify({
-        "status": ErrorCode.SUCCESS.value,
-        "score_rating": score_rating,
-        "layout": chosen_layout.to_dict(),
-    }), 200
+    logger.info(f"Returned {len(grouped_layouts)} results for {score} at [{course_name}: {layout_name}]")
+    db.close()
+    return jsonify(build_success_data(
+        course_name=course_name, 
+        layout_name=layout_name, 
+        score=score_int, 
+        layouts=grouped_layouts, 
+        rounds=rounds
+    )), 200
+
+def build_success_data(course_name: str, layout_name: str, score: int, layouts: list[Layout], rounds: list[Round]) -> dict:
+    return [
+        {
+            "status": status_success,
+            "course_name": course_name,
+            "layout_name": layout_name,
+            "score": score,
+            "score_rating": layout.score_rating(score)['rating'],
+            "layout": {
+                "layout_hole_distances": [
+                    {
+                        "hole_number": num+1,
+                        "distance": dist
+                    }
+                    for num, dist in enumerate(layout.layout_hole_distances)],
+                "layout_total_distance": layout.layout_total_distance,
+                "layout_par": layout.layout_par,
+                "layouts": layout.layouts_to_url(),
+            },
+            "rounds": [
+                {
+                    "round_date": "2021-01-01",
+                    "num_rounds": 0,
+                    "round_rating": 0,
+                }
+                for round in layout.rounds_used],
+            "percentile": 0
+        }
+        for layout in layouts]
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -104,5 +157,7 @@ if __name__ == "__main__":
 
     config_file_path = sys.argv[1]
     load_config_into_env(config_file_path)
-    db = Database(os.getenv("db_connection"))
-    serve(app, host='0.0.0.0', port=80)
+    if os.getenv("debug") == "True":
+        app.run(host='0.0.0.0', port=80)
+    else:
+        serve(app, host='0.0.0.0', port=80)

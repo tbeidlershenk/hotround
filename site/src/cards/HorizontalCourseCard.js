@@ -3,14 +3,13 @@ import Table from "@mui/joy/Table";
 import Box from "@mui/joy/Box";
 import Card from "@mui/joy/Card";
 
-export default function HoleDistanceTable({ rows }) {
-    console.log(rows);
+export default function HorizontalCourseCard({ rows }) {
     const numberOfHoles = rows.length;
 
     return (
         <Box sx={{}}>
             <Card variant="outlined" sx={{ padding: 0, overflowX: "auto", width: "100%" }}>
-                <Table variant="soft" sx={{ minWidth: 800 }}>
+                <Table variant="soft" sx={{ minWidth: numberOfHoles * 50 }}>
                     <thead>
                         {[...rows].map((hole) => (
                             <th key={hole.hole_number} style={{ textAlign: "center", padding: "8px", border: "1px #ddd" }}>

@@ -4,9 +4,22 @@ import Card from "@mui/joy/Card";
 import Box from "@mui/joy/Box";
 import { LineChart } from "@mui/x-charts/LineChart";
 
-const ResultsGraph = ({ data }) => {
+function format_score(score) {
+    console.log("here");
+    if (score === 0) {
+        return "E";
+    }
+    if (score < 0) {
+        return score;
+    }
+    if (score > 0) {
+        return `+${score}`;
+    }
+}
+
+export default function RatingStatsCard({ data }) {
     return (
-        <Card variant="outlined" sx={{ flex: 1, padding: 2, height: "450px" }}>
+        <Card variant="outlined" sx={{ flex: 1, padding: 2, height: "400px" }}>
             <Box>
                 <Box
                     sx={{
@@ -19,7 +32,7 @@ const ResultsGraph = ({ data }) => {
                     }}
                 >
                     <Typography level="title-md" sx={{ color: "white" }}>
-                        {data.score}
+                        {format_score(data.score)}
                     </Typography>
                 </Box>
                 <Box
@@ -66,6 +79,4 @@ const ResultsGraph = ({ data }) => {
             </Typography>
         </Card>
     );
-};
-
-export default ResultsGraph;
+}

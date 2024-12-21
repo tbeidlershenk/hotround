@@ -3,14 +3,14 @@ import Card from "@mui/joy/Card";
 import Link from "@mui/joy/Link";
 import Sheet from "@mui/joy/Sheet";
 
-export default function TableColumnWidth({ rows }) {
+export default function SearchedLayoutsCard({ rows }) {
     return (
         <Card variant="outlined" sx={{ flex: 1, padding: 0 }}>
             <Sheet
                 sx={(theme) => ({
                     "--TableCell-height": "40px",
                     "--TableHeader-height": "calc(1 * var(--TableCell-height))",
-                    height: "450px",
+                    height: "calc(10 * var(--TableCell-height))",
                     overflow: "auto",
                     background: `linear-gradient(${theme.vars.palette.background.surface} 30%, rgba(255, 255, 255, 0)),
             linear-gradient(rgba(255, 255, 255, 0), ${theme.vars.palette.background.surface} 70%) 0 100%,

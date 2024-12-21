@@ -3,7 +3,7 @@ import { Box, IconButton } from "@mui/joy";
 import Typography from "@mui/joy/Typography";
 import Link from "@mui/joy/Link";
 
-export default function FooterSection() {
+export default function Footer() {
     return (
         <Box
             sx={{
@@ -11,6 +11,7 @@ export default function FooterSection() {
                 flexDirection: "row",
                 justifyContent: "right",
                 alignItems: "center",
+                justifySelf: "flex-end",
                 width: "100%",
                 top: 0,
                 px: 1.5,
@@ -18,9 +19,10 @@ export default function FooterSection() {
                 zIndex: 10000,
                 backgroundColor: "background.body",
                 borderBottom: "1px solid",
+                borderTop: "1px solid",
                 borderColor: "divider",
                 position: "sticky",
-                marginTop: 2,
+                marginTop: 0,
             }}
         >
             <Typography>

@@ -1,12 +1,10 @@
 import * as React from "react";
 import { Box, IconButton } from "@mui/joy";
 import Typography from "@mui/joy/Typography";
-import Avatar from "@mui/joy/Avatar";
-import ToggleMode from "./ToggleMode";
-import Icon from "@mui/material/Icon";
-import HelpButton from "./Help";
+import ToggleMode from "./ModeButton";
+import HelpButton from "./HelpButton";
 
-export default function HeaderSection() {
+export default function Header() {
     return (
         <Box
             sx={{
