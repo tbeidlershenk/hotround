@@ -5,12 +5,13 @@ import Autocomplete from "@mui/joy/Autocomplete";
 import { createFilterOptions } from "@mui/material/Autocomplete";
 import Button from "@mui/joy/Button";
 import Input from "@mui/joy/Input";
-import { Box } from "@mui/joy";
+import { Box, ListItem } from "@mui/joy";
 import UsedLayoutsCard from "./cards/UsedLayoutsCard";
 import HorizontalCourseCard from "./cards/HorizontalCourseCard";
 import RatingStatsCard from "./cards/RatingStatsCard";
 import Pagination from "./components/Pagination";
 import Status from "./Status";
+import LayoutOption from "./components/LayoutOption";
 
 const status_none = -1;
 const status_success = 0;
@@ -20,37 +21,53 @@ const status_error_no_rounds = 3;
 
 export default function RatingCalculator({ courseOptions }) {
     const [course, setCourse] = React.useState("");
-    const [layout, setLayout] = React.useState("");
+    const [layout, setLayout] = React.useState(null);
     const [score, setScore] = React.useState(0);
     const [layoutOptions, setLayoutOptions] = React.useState([]);
-    const [results, setResults] = React.useState([]);
     const [status, setStatus] = React.useState(status_none);
     const [currentPage, setCurrentPage] = React.useState(0);
 
+    console.log("STATE");
+    console.log("---------------------------");
+    console.log("Course ", course);
+    console.log("Layout ", layout);
+    console.log("Score ", score);
+    console.log("Layout options ", layoutOptions);
+    console.log("Status ", status);
+    console.log("Current page ", currentPage);
+    console.log("---------------------------");
+    console.log("");
+
+    const inputRef = React.useRef(null);
     const defaultFilterOptions = createFilterOptions({ limit: 10 });
 
     const goNextPage = (event) => {
-        const nextPage = (currentPage + 1) % results.length;
+        const nextPage = (currentPage + 1) % layoutOptions.length;
         setCurrentPage(nextPage);
     };
 
     const goPrevPage = (event) => {
         if (currentPage === 0) {
-            setCurrentPage(results.length - 1);
+            setCurrentPage(layoutOptions.length - 1);
             return;
         }
-        const nextPage = (currentPage - 1) % results.length;
+        const nextPage = (currentPage - 1) % layoutOptions.length;
         setCurrentPage(nextPage);
     };
 
     async function handleCourseChange(course) {
-        console.log("Course name changed to: ", course);
+        // Reset all state
+        setLayout("");
+        setScore(0);
+        setStatus(status_none);
 
         if (!course || course === "") {
             setLayoutOptions([]);
             return;
         }
-        fetch(`/api/layouts/${course}`, { method: "GET" })
+
+        // Fetch aggregated layouts and rating data
+        fetch(`/api/rating/${course}`, { method: "GET" })
             .then((response) => response.json())
             .then((data) => {
                 setLayoutOptions(data);
@@ -58,10 +75,12 @@ export default function RatingCalculator({ courseOptions }) {
             .catch((error) => {
                 console.error("Error fetching layouts:", error);
             });
+
+        // Set the new course
         setCourse(course);
     }
 
-    const handleSubmit = async (event) => {
+    function handleSubmit() {
         console.log(course, layout, score);
 
         if (!course || !layout) {
@@ -69,26 +88,8 @@ export default function RatingCalculator({ courseOptions }) {
             return;
         }
 
-        try {
-            const response = await fetch(`/api/rating/${course}/${layout}/${score}`, { method: "GET" });
-            const data = await response.json();
-
-            if (data.length === 0) {
-                console.log("Returned nothing");
-                return;
-            }
-            setResults(data);
-            setCurrentPage(0);
-            setStatus(data[0].status);
-        } catch (error) {
-            console.error("Error fetching ratings:", error);
-            setResults([
-                {
-                    status: status_none,
-                },
-            ]);
-        }
-    };
+        setStatus(layout.status);
+    }
 
     function body() {
         if (status == status_none) {
@@ -102,20 +103,17 @@ export default function RatingCalculator({ courseOptions }) {
                 <Grid container spacing={2} sx={{ justifyContent: "center" }}>
                     <Grid item xs={12} sm={12} md={12} lg={12}>
                         <Typography>
-                            Returned {results.length} results. Displaying result {currentPage + 1} of {results.length}.
+                            Returned {layoutOptions.length} results. Displaying result {currentPage + 1} of {layoutOptions.length}.
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6} lg={6}>
-                        <RatingStatsCard data={results[currentPage]} />
+                        <RatingStatsCard data={layout} score={score} />
                     </Grid>
                     <Grid item xs={12} sm={6} md={6} lg={6}>
-                        <UsedLayoutsCard rows={results[currentPage].layout.layouts} />
+                        <UsedLayoutsCard rows={layout.layouts} />
                     </Grid>
                     <Grid item sm={12} md={12} lg={12}>
-                        <HorizontalCourseCard rows={results[currentPage].layout.layout_hole_distances} />
-                    </Grid>
-                    <Grid item sm={12} md={12} lg={12}>
-                        <Pagination onPageForward={goNextPage} onPageBackward={goPrevPage}></Pagination>
+                        <HorizontalCourseCard rows={layout.layout_hole_distances} />
                     </Grid>
                 </Grid>
             );
@@ -131,7 +129,7 @@ export default function RatingCalculator({ courseOptions }) {
     return (
         <Grid container spacing={2} sx={{ justifyContent: "center", alignItems: "top", px: 2, mb: 2, flex: 1 }}>
             <Grid item container width="100vw" height="150px" spacing={2} justifyContent={"center"}>
-                <Grid item xs={5} sm={2}>
+                <Grid item xs={5} sm={2.5}>
                     <Autocomplete
                         label="Course Name"
                         name="courseName"
@@ -145,38 +143,54 @@ export default function RatingCalculator({ courseOptions }) {
                         color="primary"
                     />
                 </Grid>
-                <Grid item xs={5} sm={2}>
+                <Grid item xs={5} sm={2.5}>
                     <Autocomplete
-                        freeSolo
                         label="Layout Name"
                         name="layoutName"
-                        placeholder="Layout name"
+                        placeholder="Layout keywords"
                         options={layoutOptions}
-                        value={layout}
-                        onInputChange={(_, value) => {
+                        getOptionLabel={(option) => (typeof option === "string" ? option : option.layout_name)}
+                        onChange={(_, value) => {
                             setLayout(value);
                         }}
+                        renderOption={(props, option) => (
+                            <ListItem {...props}>
+                                <LayoutOption option={option} />
+                            </ListItem>
+                        )}
                         variant="outlined"
                         color="primary"
+                        disableClearable={true}
+                        autoHightlight
                     />
                 </Grid>
-                <Grid item xs={5} sm={2}>
+                <Grid item xs={10} sm={2.5}>
                     <Input
                         label="Score (relative to par)"
                         name="score"
                         placeholder="Score"
                         type="number"
+                        slotProps={{
+                            input: {
+                                ref: inputRef,
+                                min: -1000,
+                                max: 1000,
+                                step: 1,
+                            },
+                        }}
                         onChange={(event) => {
-                            setScore(event.target.value);
+                            if (event.target.value === "") {
+                                setScore(0);
+                            } else {
+                                setScore(parseInt(event.target.value));
+                            }
+                            if (layout) {
+                                handleSubmit();
+                            }
                         }}
                         variant="outlined"
                         color="primary"
                     />
-                </Grid>
-                <Grid item xs={5} sm={2}>
-                    <Button variant="solid" color="primary" onClick={handleSubmit} size="sm" fullWidth>
-                        Calculate
-                    </Button>
                 </Grid>
             </Grid>
 

@@ -18,7 +18,8 @@ export default function HelpButton(props) {
                         How to use
                     </Typography>
                     <Typography sx={{ mt: 2, mb: 2 }}>
-                        Use the search inputs to query by course name, layout name, then enter the your score and click calculate.
+                        Use the search inputs to query by course name, layout keywords (such as "Gold", "Short", etc.), then enter the your
+                        score and click calculate.
                     </Typography>
                     <Typography variant="h5" component="h2" sx={{ color: "#008E6F" }}>
                         How it works

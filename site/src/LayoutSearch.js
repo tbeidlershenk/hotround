@@ -7,12 +7,22 @@ import Button from "@mui/joy/Button";
 import { Box } from "@mui/joy";
 import SearchedLayoutsCard from "./cards/SearchedLayoutsCard";
 import HorizontalCourseCard from "./cards/HorizontalCourseCard";
+import RatingStatsCard from "./cards/RatingStatsCard";
+import UsedLayoutsCard from "./cards/UsedLayoutsCard";
 import Pagination from "./components/Pagination";
 
 const defaultFilterOptions = createFilterOptions({ limit: 10 });
 
-export default function RatingCalculator({ courseOptions }) {
+const status_none = -1;
+const status_success = 0;
+const status_error_no_matches = 1;
+const status_error_no_layouts = 2;
+const status_error_no_rounds = 3;
+
+export default function LayoutSearch({ courseOptions }) {
     const [courseName, setCourseName] = React.useState("");
+    const [selectedLayout, setSelectedLayout] = React.useState(null);
+    const [score, setScore] = React.useState(0);
     const [layoutOptions, setLayoutOptions] = React.useState([]);
     const [results, setResults] = React.useState([]);
     const [currentPage, setCurrentPage] = React.useState(0);
@@ -58,6 +68,7 @@ export default function RatingCalculator({ courseOptions }) {
                         color="primary"
                     />
                 </Grid>
+
                 <Grid item xs={8} sm={4}>
                     <Button variant="solid" color="primary" onClick={handleSubmit} size="sm" fullWidth>
                         Search

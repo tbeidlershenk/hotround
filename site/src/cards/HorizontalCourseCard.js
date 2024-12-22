@@ -9,7 +9,7 @@ export default function HorizontalCourseCard({ rows }) {
     return (
         <Box sx={{}}>
             <Card variant="outlined" sx={{ padding: 0, overflowX: "auto", width: "100%" }}>
-                <Table variant="soft" sx={{ minWidth: numberOfHoles * 50 }}>
+                <Table variant="soft" sx={{ minWidth: numberOfHoles * 48 }}>
                     <thead>
                         {[...rows].map((hole) => (
                             <th key={hole.hole_number} style={{ textAlign: "center", padding: "8px", border: "1px #ddd" }}>

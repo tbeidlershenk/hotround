@@ -41,11 +41,30 @@ def courses():
 def layouts(course_name: str):
     db = Database(os.getenv("db_connection"))
     rounds = db.query_rounds_for_course(course_name)
-    layout_names = list(set([round.layout_name for round in rounds]))
+    layouts = group_comparable_rounds(rounds)
+    data = [{
+        "layout_tokens": layout.layout_tokens,
+        "layout_names": layout.layout_names,
+        "layout_hole_distances": layout.layout_hole_distances,
+        "layout_total_distance": layout.layout_total_distance,
+        "layout_par": layout.layout_par,
+    } for layout in layouts]
     db.close()
-    return jsonify(layout_names)
+    return jsonify(data), 200
 
-@app.route('/api/rating/<course_name>/<layout_name>/<score>', methods=['GET'])
+@app.route('/api/rating/<course_name>', methods=['GET'])
+def new_rating(course_name: str):
+    db = Database(os.getenv("db_connection"))
+    rounds = db.query_rounds_for_course(course_name)
+    layouts = group_comparable_rounds(rounds)
+    db.close()
+    return jsonify(build_success_data(
+        course_name=course_name, 
+        layouts=layouts
+    )), 200
+    
+    
+#@app.route('/api/rating/<course_name>/<layout_name>/<score>', methods=['GET'])
 def rating(course_name: str, layout_name: str, score: str):
     db = Database(os.getenv("db_connection"))
     score_int = int(score)
@@ -108,37 +127,33 @@ def rating(course_name: str, layout_name: str, score: str):
             "close_layouts": list(all_layout_names)[:10],
         }), 200
 
-    chosen_layout = grouped_layouts[0]
-    score_rating = chosen_layout.score_rating(score_int)['rating']
     logger.info(f"Returned {len(grouped_layouts)} results for {score} at [{course_name}: {layout_name}]")
     db.close()
     return jsonify(build_success_data(
         course_name=course_name, 
         layout_name=layout_name, 
-        score=score_int, 
         layouts=grouped_layouts, 
         rounds=rounds
     )), 200
 
-def build_success_data(course_name: str, layout_name: str, score: int, layouts: list[Layout], rounds: list[Round]) -> dict:
+def build_success_data(course_name: str, layouts: list[Layout]) -> dict:
     return [
         {
             "status": status_success,
             "course_name": course_name,
-            "layout_name": layout_name,
-            "score": score,
-            "score_rating": layout.score_rating(score)['rating'],
-            "layout": {
-                "layout_hole_distances": [
-                    {
-                        "hole_number": num+1,
-                        "distance": dist
-                    }
-                    for num, dist in enumerate(layout.layout_hole_distances)],
-                "layout_total_distance": layout.layout_total_distance,
-                "layout_par": layout.layout_par,
-                "layouts": layout.layouts_to_url(),
-            },
+            "layout_name": layout.get_descriptive_name(),
+            "layout_hole_distances": [
+                {
+                    "hole_number": num+1,
+                    "distance": dist
+                }
+                for num, dist in enumerate(layout.layout_hole_distances)],
+            "layout_total_distance": layout.layout_total_distance,
+            "layout_par": layout.layout_par,
+            "num_holes": layout.num_holes,
+            "par_rating": layout.par_rating,
+            "stroke_value": layout.stroke_value,
+            "layouts": layout.layouts_to_url(),
             "rounds": [
                 {
                     "round_date": "2021-01-01",

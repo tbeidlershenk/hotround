@@ -41,9 +41,29 @@ class Layout:
         self.layout_hole_distances = layout_hole_distances
         self.layout_total_distance = layout_total_distance
         self.layout_par = layout_par
+        self.num_holes = len(layout_hole_distances)
         self.layout_names = layout_names
+        self.layout_tokens = self.tokenize_layout_names()
         self.rounds_used = rounds_used
+        self.par_rating = int(np.mean([x.par_rating for x in self.rounds_used]))
+        self.stroke_value = np.mean([x.stroke_value for x in self.rounds_used])
 
+    def to_dict(self) -> dict:
+        return {
+            "layout_hole_distances": self.layout_hole_distances,
+            "layout_total_distance": self.layout_total_distance,
+            "layout_par": self.layout_par,
+            "num_holes": self.num_holes,
+            "layout_names": self.layout_names,
+            "layout_tokens": self.layout_tokens,
+            "rounds_used": [x.to_dict() for x in self.rounds_used],
+            "par_rating": self.par_rating,
+            "stroke_value": self.stroke_value
+        }
+
+    def get_descriptive_name(self) -> str:
+        return f"P{self.layout_par} - {self.layout_total_distance}ft - {self.num_holes}H"
+    
     def score_rating(self, score: int) -> dict:
         par_ratings = [x.par_rating for x in self.rounds_used]
         par_rating = int(np.mean(par_ratings))
@@ -57,6 +77,22 @@ class Layout:
         self.rounds_used.sort(key=lambda x: x.event_id)
         grouped_layouts: groupby[int, list[Round]] = groupby(self.rounds_used, key=lambda r: r.event_id)        
         return [f"[{list(rounds)[0].layout_name}]({to_pdgalive_link(event_id)})" for event_id, rounds in grouped_layouts]
+    
+    def tokenize_layout_names(self) -> list[str]:
+        tokens = []
+        frequencies = {}
+        for name in self.layout_names:
+            tokens.extend(name.lower().split(' '))
+        for token in tokens:
+            if token in frequencies:
+                frequencies[token] += 1
+            else:
+                frequencies[token] = 1
+        sorted_frequencies = sorted(frequencies.items(), key=lambda item: item[1], reverse=True)
+        sorted_tokens = [token for (token, _) in sorted_frequencies]
+        logger.info(sorted_frequencies)
+        logger.info(sorted_tokens)
+        return sorted_tokens
     
     def layouts_to_url(self) -> list[dict]:
         self.rounds_used.sort(key=lambda x: x.event_id)
@@ -82,15 +118,6 @@ class Layout:
     
     def course_metadata(self) -> str:
         return (f"Par {self.layout_par}, Distance {self.layout_total_distance} feet")
-    
-    def to_dict(self) -> dict:
-        return {
-            "layout_hole_distances": self.layout_hole_distances,
-            "layout_total_distance": self.layout_total_distance,
-            "layout_par": self.layout_par,
-            "layout_names": self.layout_names,
-            "rounds_used": [x.to_dict() for x in self.rounds_used]
-        }
 
 def remove_distance_outliers(rounds: list[Round], threshold: int) -> list:
     distances = np.array([round.layout_total_distance for round in rounds])

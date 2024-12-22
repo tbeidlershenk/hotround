@@ -32,39 +32,8 @@ function App() {
         <CssVarsProvider disableTransitionOnChange theme={theme} colorScheme={"dark"}>
             <CssBaseline />
             <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-                <Tabs aria-label="Basic tabs" defaultValue={0} sx={{ flex: 1 }}>
-                    <TabList>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                width: "100%",
-                                top: 0,
-                                px: 1.5,
-                                py: 1,
-                                backgroundColor: "background.body",
-                                position: "sticky",
-                            }}
-                        >
-                            <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                                <Tab>Round Rating</Tab>
-                                <Tab>Layout Search</Tab>
-                            </Box>
-                            <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                                <HelpButton />
-                                <ModeButton sx={{ alignSelf: "center" }} />
-                            </Box>
-                        </Box>
-                    </TabList>
-                    <TabPanel value={0}>
-                        <RatingCalculator courseOptions={courseOptions} />
-                    </TabPanel>
-                    <TabPanel value={1}>
-                        <LayoutSearch courseOptions={courseOptions} />
-                    </TabPanel>
-                </Tabs>
+                <Header />
+                <RatingCalculator courseOptions={courseOptions} />
                 <Footer />
             </Box>
         </CssVarsProvider>
