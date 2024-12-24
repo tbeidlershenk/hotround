@@ -41,23 +41,9 @@ export default function RatingCalculator({ courseOptions }) {
     const inputRef = React.useRef(null);
     const defaultFilterOptions = createFilterOptions({ limit: 10 });
 
-    const goNextPage = (event) => {
-        const nextPage = (currentPage + 1) % layoutOptions.length;
-        setCurrentPage(nextPage);
-    };
-
-    const goPrevPage = (event) => {
-        if (currentPage === 0) {
-            setCurrentPage(layoutOptions.length - 1);
-            return;
-        }
-        const nextPage = (currentPage - 1) % layoutOptions.length;
-        setCurrentPage(nextPage);
-    };
-
     async function handleCourseChange(course) {
         // Reset all state
-        setLayout("");
+        setLayout(null);
         setScore(0);
         setStatus(status_none);
 
@@ -84,7 +70,6 @@ export default function RatingCalculator({ courseOptions }) {
         console.log(course, layout, score);
 
         if (!course || !layout) {
-            alert("Please fill in all fields.");
             return;
         }
 
@@ -148,10 +133,20 @@ export default function RatingCalculator({ courseOptions }) {
                         label="Layout Name"
                         name="layoutName"
                         placeholder="Layout keywords"
+                        slotProps={{
+                            listbox: {
+                                sx: {
+                                    minWidth: "275px", // Allow the width to adjust to content
+                                    whiteSpace: "nowrap", // Prevent content from wrapping
+                                },
+                            },
+                        }}
                         options={layoutOptions}
+                        defaultValue={layoutOptions.length > 0 ? layoutOptions[0] : null}
                         getOptionLabel={(option) => (typeof option === "string" ? option : option.layout_name)}
                         onChange={(_, value) => {
                             setLayout(value);
+                            handleSubmit();
                         }}
                         renderOption={(props, option) => (
                             <ListItem {...props}>
@@ -160,7 +155,6 @@ export default function RatingCalculator({ courseOptions }) {
                         )}
                         variant="outlined"
                         color="primary"
-                        disableClearable={true}
                         autoHightlight
                     />
                 </Grid>
@@ -184,9 +178,7 @@ export default function RatingCalculator({ courseOptions }) {
                             } else {
                                 setScore(parseInt(event.target.value));
                             }
-                            if (layout) {
-                                handleSubmit();
-                            }
+                            handleSubmit();
                         }}
                         variant="outlined"
                         color="primary"
