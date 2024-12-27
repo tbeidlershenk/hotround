@@ -4,9 +4,26 @@ import Card from "@mui/joy/Card";
 import Box from "@mui/joy/Box";
 import { LineChart } from "@mui/x-charts/LineChart";
 
-const ResultsGraph = ({ data }) => {
+function format_score(score) {
+    if (score === 0) {
+        return "E";
+    }
+    if (score < 0) {
+        return score;
+    }
+    if (score > 0) {
+        return `+${score}`;
+    }
+}
+
+function format_rating(data, score) {
+    const rating = data.par_rating - score * data.stroke_value;
+    return Math.round(rating);
+}
+
+export default function RatingStatsCard({ data, score }) {
     return (
-        <Card variant="outlined" sx={{ flex: 1, padding: 2, height: "450px" }}>
+        <Card variant="outlined" sx={{ flex: 1, padding: 2, height: "400px" }}>
             <Box>
                 <Box
                     sx={{
@@ -19,7 +36,7 @@ const ResultsGraph = ({ data }) => {
                     }}
                 >
                     <Typography level="title-md" sx={{ color: "white" }}>
-                        {data.score}
+                        {format_score(score)}
                     </Typography>
                 </Box>
                 <Box
@@ -33,7 +50,7 @@ const ResultsGraph = ({ data }) => {
                     }}
                 >
                     <Typography level="title-md" sx={{ color: "white" }}>
-                        {data.score_rating}
+                        {format_rating(data, score)}
                     </Typography>
                 </Box>
                 <Box
@@ -46,9 +63,9 @@ const ResultsGraph = ({ data }) => {
                     }}
                 >
                     <Typography>
-                        Total <Typography fontWeight={"bold"}>{data.layout.layout_par + data.score}</Typography> • Par{" "}
-                        <Typography fontWeight={"bold"}>{data.layout.layout_par}</Typography> • Dist{" "}
-                        <Typography fontWeight={"bold"}>{data.layout.layout_total_distance}</Typography>
+                        Total <Typography fontWeight={"bold"}>{data.layout_par + score}</Typography> • Par{" "}
+                        <Typography fontWeight={"bold"}>{data.layout_par}</Typography> • Dist{" "}
+                        <Typography fontWeight={"bold"}>{data.layout_total_distance}</Typography>
                     </Typography>
                 </Box>
             </Box>
@@ -66,6 +83,4 @@ const ResultsGraph = ({ data }) => {
             </Typography>
         </Card>
     );
-};
-
-export default ResultsGraph;
+}
