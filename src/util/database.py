@@ -86,3 +86,6 @@ class Database:
             .all()
         )
         return all_rounds
+    
+    def close(self) -> None:
+        self.session.close()

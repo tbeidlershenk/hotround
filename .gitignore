@@ -12,7 +12,7 @@ Pipfile
 *.db
 ngrok_config.yml
 update_pi_config.sh
-pipeline.ipynb
+*.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
