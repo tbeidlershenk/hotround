@@ -9,7 +9,8 @@ from flask_cors import CORS
 from pyngrok import ngrok
 from pyngrok import conf
 from exts import status
-from models.round import Layout, Round, AggregateLayout, Round, group_comparable_rounds
+from models.round import Round
+from models.layout import Layout, AggregateLayout, aggregate_layouts
 from util.configuration import load_config_into_env
 from util.database import Database
 from enum import Enum
@@ -37,33 +38,18 @@ def courses():
     db.close()
     return jsonify([course.readable_course_name for course in courses])
 
-@app.route('/api/layouts/<course_name>', methods=['GET'])
-def layouts(course_name: str):
-    db = Database(os.getenv("db_connection"))
-    rounds = db.query_rounds_for_course(course_name)
-    layouts = group_comparable_rounds(rounds)
-    data = [{
-        "layout_tokens": layout.layout_tokens,
-        "layout_names": layout.layout_names,
-        "layout_hole_distances": layout.layout_hole_distances,
-        "layout_total_distance": layout.layout_total_distance,
-        "layout_par": layout.layout_par,
-    } for layout in layouts]
-    db.close()
-    return jsonify(data), 200
-
 @app.route('/api/rating/<course_name>', methods=['GET'])
 def new_rating(course_name: str):
     db = Database(os.getenv("db_connection"))
-    rounds = db.query_rounds_for_course(course_name)
-    layouts = group_comparable_rounds(rounds)
+    layouts_rounds = db.query_aggregate_layouts(course_name)
+    aggregated_layouts = aggregate_layouts(layouts_rounds)
     db.close()
     return jsonify(build_success_data(
         course_name=course_name, 
-        layouts=layouts
+        layouts=aggregated_layouts
     )), 200
     
-def build_success_data(course_name: str, layouts: list[Layout]) -> dict:
+def build_success_data(course_name: str, layouts: list[AggregateLayout]) -> dict:
     return [
         {
             "status": status_success,
