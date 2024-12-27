@@ -47,6 +47,7 @@ class Layout:
         self.rounds_used = rounds_used
         self.par_rating = int(np.mean([x.par_rating for x in self.rounds_used]))
         self.stroke_value = np.mean([x.stroke_value for x in self.rounds_used])
+        self.descriptive_name = self.get_descriptive_name()
 
     def to_dict(self) -> dict:
         return {
@@ -58,11 +59,14 @@ class Layout:
             "layout_tokens": self.layout_tokens,
             "rounds_used": [x.to_dict() for x in self.rounds_used],
             "par_rating": self.par_rating,
-            "stroke_value": self.stroke_value
+            "stroke_value": self.stroke_value,
+            "descriptive_name": self.descriptive_name
         }
 
     def get_descriptive_name(self) -> str:
-        return f"P{self.layout_par} - {self.layout_total_distance}ft - {self.num_holes}H"
+        filtered_tokens = [token for token in self.layout_tokens if len(token) > 2]
+        filtered_tokens = [token for token in filtered_tokens if not token.isnumeric()]
+        return ', '.join(filtered_tokens[0:5])
     
     def score_rating(self, score: int) -> dict:
         par_ratings = [x.par_rating for x in self.rounds_used]
