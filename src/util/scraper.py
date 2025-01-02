@@ -1,4 +1,7 @@
+from re import S
 import warnings
+from models.layout import Layout
+from models.score import Score
 warnings.filterwarnings("ignore")
 
 from bs4 import BeautifulSoup
@@ -16,22 +19,34 @@ from util.requests import get_request_avoid_rate_limit
 from datetime import datetime
 from itertools import product
 from logger import logger
+import traceback
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
-def try_parse_layout_hole_distances(layout_hole_distances: list[int]) -> list[int]:
+import chromedriver_autoinstaller
+chromedriver_autoinstaller.install()
+
+def try_parse_hole_data(hole_elements: list[HtmlElement], num_holes: int, default: int, drop_last=True) -> list[int]:
+    if hole_elements == []:
+        return [default for _ in range(num_holes)]
     try:
-        hole_count = len(layout_hole_distances[:-1])
-        return [int(x.text) for x in layout_hole_distances[:-1]]
+        if drop_last:
+            return [int(x.text) for x in hole_elements[:-1]]
+        else:
+            return [int(x.text) for x in hole_elements]
     except:
-        return [0 for _ in range(hole_count)]
+        return [default for _ in range(num_holes)]
 
 class Scraper:
     def __init__(self, chromedriver_path: str = None) -> None:
         options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--window-size=1920,1080')
-        service = Service() if chromedriver_path is None else Service(chromedriver_path)
-        self.driver = webdriver.Chrome(service=service, options=options)
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        # options.add_argument('--headless')
+        # options.add_argument('--disable-gpu')
+        # options.add_argument('--window-size=1920,1080')
+        self.driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
 
     def cleanup(self) -> None:
         self.driver.quit()
@@ -69,7 +84,6 @@ class Scraper:
 
         return all_courses
 
-
     def get_readable_course_name(self, course_name: str) -> str:
         """
         Fetches and returns a human-readable course name from a given course identifier.
@@ -90,7 +104,6 @@ class Scraper:
         except Exception as e:
             logger.info(f'Error fetching readable name for {course_name}: {e}')
             return course_name
-
 
     def get_all_sanctioned_events(self, course_name: str, after_date: datetime = None) -> list[Event]:
         """
@@ -167,7 +180,6 @@ class Scraper:
 
         return events
 
-
     def get_round_ratings_for_tournament(self, event_id: int) -> list[Round]:
         """
         Fetches and calculates round ratings for a given tournament event.
@@ -208,59 +220,77 @@ class Scraper:
                     EC.presence_of_element_located((By.XPATH, Consts.pdgalive_player_row_xpath)))
                 soup = BeautifulSoup(self.driver.page_source, 'html.parser')
                 tree: HtmlElement = html.fromstring(str(soup))
-                course_name = tree.xpath(Consts.pdgalive_course_name_xpath)[
-                    0].text_content().strip()
-                course_layout = tree.xpath(Consts.pdgalive_course_layout_xpath)[
-                    0].text_content().strip()
 
-                # get low, high rating and calculate average
-                layout_par = int(tree.xpath(Consts.pdgalive_layout_par_xpath)[0].text)
-                layout_distances = tree.xpath(Consts.pdgalive_hole_layout_distance_xpath)
-                layout_total_distance = int(layout_distances[-1].text.replace('\'', ''))
-                layout_hole_distances = try_parse_layout_hole_distances(layout_distances)
+                layout_name = tree.xpath(Consts.pdgalive_layout_name_xpath)[0].text_content().strip()
+                num_holes = len(tree.xpath(Consts.pdgalive_layout_hole_headers_xpath)) - 1
+                layout_par_elements: list[HtmlElement] = tree.xpath(Consts.pdgalive_layout_pars_xpath)
+                layout_distance_elements: list[HtmlElement] = tree.xpath(Consts.pdgalive_layout_distances_xpath)
+                layout_hole_pars = try_parse_hole_data(layout_par_elements, num_holes, 3)
+                layout_total_par = sum(layout_hole_pars)
+                layout_hole_distances = try_parse_hole_data(layout_distance_elements, num_holes, 0)
+                layout_total_distance = sum(layout_hole_distances)
+
+                # get score data
                 player_rows: list[HtmlElement] = [x for x in tree.xpath(
-                    Consts.pdgalive_player_row_xpath) if 'DNF' not in x.text_content()]
+                    Consts.pdgalive_player_row_xpath)]
                 num_players = len(player_rows)
                 if num_players <= 1:
                     raise Exception(f'Not enough players ({num_players})')
-
-                # first player data
-                first_player_row: HtmlElement = player_rows[0]
-                first_player_raw_score = int(
-                    first_player_row.xpath('.' + Consts.pdgalive_player_row_cell_xpath)[-2].text)
-                first_player_score = first_player_raw_score - layout_par
-                first_player_rating = int(
-                    first_player_row.xpath('.' + Consts.pdgalive_player_row_cell_xpath)[-1].text)
-                # last player data
-                last_player_row: HtmlElement = player_rows[-1]
-                last_player_raw_score = int(
-                    last_player_row.xpath('.' + Consts.pdgalive_player_row_cell_xpath)[-2].text)
-                last_player_score = last_player_raw_score - layout_par
-                last_player_rating = int(last_player_row.xpath(
-                    '.' + Consts.pdgalive_player_row_cell_xpath)[-1].text)
+                
+                scores: list[Score] = []
+                for row in player_rows:
+                    raw_score = row.xpath(Consts.pdgalive_player_data_xpath)[-3].text_content()
+                    if raw_score == 'DNF':
+                        continue
+                    score = int(raw_score) - layout_total_par
+                    rating = int(row.xpath(Consts.pdgalive_player_data_xpath)[-2].text_content())
+                    hole_scores = try_parse_hole_data(row.xpath(Consts.pdgalive_hole_score_xpath), num_holes, -1, drop_last=False)
+                    score = Score(
+                        rating=rating,
+                        score=score,
+                        hole_scores=', '.join([str(x) for x in hole_scores])
+                    )
+                    scores.append(score)
 
                 # calculate round statistics
-                score_diff = float(last_player_score - first_player_score)
-                rating_diff = float(first_player_rating - last_player_rating)
+                scores.sort(key=lambda x: x.score)
+                first = scores[0]
+                last = scores[-1]
+                score_diff = float(last.score - first.score)
+                rating_diff = float(first.rating - last.rating)
                 stroke_value = rating_diff / score_diff
-                par_rating = int(last_player_rating + (last_player_score * stroke_value))
+                par_rating = int(last.rating + (last.score * stroke_value))
+
+                layout = Layout(
+                    layout_name=layout_name,
+                    num_holes=num_holes,
+                    pars=', '.join([str(x) for x in layout_hole_pars]),
+                    distances=', '.join([str(x) for x in layout_hole_distances]),
+                    total_par=layout_total_par,
+                    total_distance=layout_total_distance
+                )
                 round = Round(
-                    event_id=event_id,
-                    layout_name=course_layout,
                     round_number=round_number,
                     num_players=num_players,
-                    layout_par=layout_par,
-                    layout_hole_distances=', '.join([str(x) for x in layout_hole_distances]),
-                    layout_total_distance=layout_total_distance,
-                    high_rating=first_player_rating,
-                    low_rating=last_player_rating,
+                    high_rating=first.rating,
+                    low_rating=last.rating,
+                    par_rating=par_rating,
                     stroke_value=stroke_value,
-                    par_rating=par_rating
+                    event_id=event_id,  
                 )
+
+                # set relationships
+                layout.round = round
+                for score in scores:
+                    score.round = round
+                round.layout = layout
+                round.scores = scores
+
                 rating_data.append(round)
                 logger.info(f'Fetched new round: {pdga_live_url}')
             except Exception as e:
                 logger.info(f'Error fetching round: {pdga_live_url}')
                 logger.info(f"Reason: {e}")
+                logger.info(traceback.format_exc())
 
         return rating_data

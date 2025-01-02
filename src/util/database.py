@@ -98,8 +98,9 @@ class Database:
         
         course_name = course.course_name
         layouts_rounds = (
-            self.session.query(Round, Layout)
+            self.session.query(Round, Layout, Score)
             .filter(Round.round_id == Layout.round_id)
+            .filter(Layout.round_id == Score.round_id)
             .join(Event, Round.event_id == Event.event_id)
             .filter(Event.course_name == course_name)
             .all()

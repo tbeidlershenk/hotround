@@ -15,6 +15,8 @@ COMMASPACE = ', '
 async def get_ratings(
     inter: disnake.CommandInteraction, 
     course_name: str = commands.Param(max_length=100, description="Name of course you played"), 
+    # TODO find a better solution for UX purposes
+    layout_keywords: str = commands.Param(max_length=200, description="Comma separated keywords (ex. 'Gold, Long, MPO' )"), 
     score: int = commands.Param(description="Your score, relative to par")):
     """
     Fetches ratings for a specified course and layout.
@@ -26,10 +28,10 @@ async def get_ratings(
         None
     """
     bot: CaddieBot = plugin.bot
+
     all_course_names = [course.readable_course_name for course in bot.database.query_courses()]
     scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
-
-    # ERR: No close course matches
+    # ERROR: No close course matches
     if course_name not in [course for course, _ in scored_course_names]:
         similar_course_names = [course for course, _ in scored_course_names]
         await inter.response.send_message(embed=disnake.Embed.from_dict({
@@ -49,7 +51,6 @@ async def get_ratings(
         return
     
     aggregate_layouts = bot.database.query_aggregate_layouts(course_name)
-
     # ERROR: No sanctioned rounds
     if len(aggregate_layouts) == 0:
         await inter.response.send_message(embed=disnake.Embed.from_dict({
@@ -64,7 +65,9 @@ async def get_ratings(
             }
         }), ephemeral=False)
         return
-
+    
+    layout_keywords = layout_keywords.split(', ')
+    aggregate_layouts.sort(key=lambda x: x.score_layout_tokens(layout_keywords), reverse=True)
     embeds = [
         disnake.Embed.from_dict({
             "title": f"{course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",

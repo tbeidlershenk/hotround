@@ -44,19 +44,22 @@ class Consts:
 
     # XPaths
     pdgalive_division_picker_xpath = '//div[contains(@class, "division-picker")]'
-    pdgalive_division_xpath = pdgalive_division_picker_xpath + '//button[not(text()="Leaders")]'
-    pdgalive_round_picker_xpath = pdgalive_division_picker_xpath + '/following-sibling::div[1]'
-    pdgalive_round_xpath = pdgalive_round_picker_xpath + '//div[contains(text(), "Rd")]'
-    pdgalive_round_course_metadata_xpath = '//div[contains(@class, "round-course-meta")]'
-    pdgalive_round_course_metadata_text_xpath = pdgalive_round_course_metadata_xpath + '//text()'
-    pdgalive_course_layout_xpath = '//div[i[contains(@class, "pi-course-layout")]]'
+    pdgalive_division_xpath = '//div[contains(@class, "division-picker")]//button[not(text()="Leaders")]'
+    pdgalive_round_xpath = '//div[contains(@class, "division-picker")]/following-sibling::div[1]//div[contains(text(), "Rd")]'
+    pdgalive_round_course_metadata_text_xpath = '//div[contains(@class, "round-course-meta")]//text()'
+    pdgalive_layout_hole_headers_xpath = "//div[contains(@class, 'hole-header-wrapper')]"
+    pdgalive_layout_distances_xpath = "//div[contains(@class, 'header-row')]//div[contains(@class, 'hole-length')]"
+    pdgalive_layout_pars_xpath = "//div[contains(@class, 'header-row')]//div[contains(@class, 'label-2')]"
+    
+    pdgalive_layout_name_xpath = '//div[i[contains(@class, "pi-course-layout")]]'
     pdgalive_course_name_xpath = '//span[contains(@class, "event-name-main")]'
-    pdgalive_layout_par_xpath = "//div[contains(@class, 'header-col') and contains(string(),'Tot')]//div[contains(@class, 'label-2')]"
-    pdgalive_hole_layout_distance_xpath = "//div[contains(@class, 'hole-length')]"
+    pdgalive_layout_total_par_xpath = "//div[contains(@class, 'header-col') and contains(string(),'Tot')]//div[contains(@class, 'label-2')]"
+    pdgalive_hole_par_xpath = "//div[contains(@class, )]"
     pdgalive_player_row_xpath = '//div[contains(@class, "table-row-content")]'
-    pdgalive_player_score_xpath = "//div[contains(@class, 'round-score')]"
-    pdgalive_player_rating_xpath = "//div[contains(@class, 'cell-wrapper')]//div"
+    pdgalive_player_score_xpath = ".//div[contains(@class, 'round-score')]"
+    pdgalive_player_data_xpath = ".//div[contains(@class, 'cell-wrapper')]"
     pdgalive_player_row_cell_xpath = "//div[contains(@class, 'cell-wrapper')]//div"
+    pdgalive_hole_score_xpath = ".//div[contains(@class, 'hs')]"
 
     # Regexes
     round_regex = r'Round (\d)'

@@ -41,8 +41,7 @@ def courses():
 @app.route('/api/rating/<course_name>', methods=['GET'])
 def new_rating(course_name: str):
     db = Database(os.getenv("db_connection"))
-    layouts_rounds = db.query_aggregate_layouts(course_name)
-    aggregated_layouts = aggregate_layouts(layouts_rounds)
+    aggregated_layouts = db.query_aggregate_layouts(course_name)
     db.close()
     return jsonify(build_success_data(
         course_name=course_name, 
