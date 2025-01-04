@@ -1,12 +1,14 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey
+import json
+from turtle import xcor
+from sqlalchemy import Column, Integer, String
 from models.base import Base
 import itertools
 from sqlalchemy.orm import relationship
 import numpy as np
 from models.round import Round
-from models.score import Score
+from scipy.cluster.hierarchy import linkage, fcluster
+
 from util.strings import to_pdgalive_link
-from logger import logger
 
 class Layout(Base):
     __tablename__ = 'Layouts'
@@ -19,21 +21,32 @@ class Layout(Base):
     total_distance = Column(Integer, nullable=True)
     round = relationship("Round", back_populates="layout", uselist=False)
 
+    def to_dict(self) -> dict:
+        return {
+            "layout_name": self.layout_name,
+            "num_holes": self.num_holes,
+            "pars": self.pars,
+            "distances": self.distances,
+            "total_par": self.total_par,
+            "total_distance": self.total_distance
+        }
+
 class AggregateLayout:
-    def __init__(self, layouts_rounds: list[tuple[Layout, Round, list[Score]]]):
+    def __init__(self, rounds: list[Round]):
         """
         Generates an aggregate layout by averaging a list of layouts.
         Assumes that the list is non-empty and layouts have valid data.
         """
-        self.layouts = [x[0] for x in layouts_rounds]
-        self.rounds = [x[1] for x in layouts_rounds]
-        self.scores = itertools.chain([x[2] for x in layouts_rounds])
+        self.rounds = rounds
+        self.layouts = [x.layout for x in rounds]
+        self.scores = itertools.chain([x.scores for x in rounds])
         self.num_layouts = len(self.layouts)
-        self.distances = self.averaged_distances()
-        self.pars = [int(x) for x in self.layouts[0].pars]
-        self.total_distance = int(np.mean([x.total_distance for x in self.layouts]))
-        self.total_par = self.layouts[0].total_par
+        self.num_tournaments = len(set([x.event_id for x in rounds]))
         self.num_holes = self.layouts[0].num_holes
+        self.distances = self.averaged_distances()
+        self.total_distance = int(np.mean([x.total_distance for x in self.layouts]))
+        self.pars = [int(x) for x in self.layouts[0].pars.split(', ')]
+        self.total_par = self.layouts[0].total_par
         self.layout_names = [x.layout_name for x in self.layouts]
         self.layout_tokens = self.tokenize_layout_names()
         self.descriptive_name = self.get_descriptive_name()
@@ -42,11 +55,13 @@ class AggregateLayout:
 
     def to_dict(self) -> dict:
         return {
+            "num_layouts": self.num_layouts,
+            "num_tournaments": self.num_tournaments,
+            "num_holes": self.num_holes,
             "distances": self.distances,
             "total_distance": self.total_distance,
             "pars": self.pars,
             "total_par": self.total_par,
-            "num_holes": self.num_holes,
             "layout_names": self.layout_names,
             "layout_tokens": self.layout_tokens,
             "descriptive_name": self.descriptive_name,
@@ -55,7 +70,7 @@ class AggregateLayout:
         }
 
     def averaged_distances(self) -> list[int]:
-        str_distances = [x.distances.split(', ') for x in self.layouts_used]
+        str_distances = [x.distances.split(', ') for x in self.layouts]
         int_distances = [[int(x) for x in y] for y in str_distances]
         distances = []
         for i in range(self.num_holes):
@@ -93,12 +108,13 @@ class AggregateLayout:
         hole_columns = []
         for c in range(columns):
             start = c*holes_per_column
-            holes = self.distances[c*holes_per_column:(c+1)*holes_per_column]
-            hole_columns.append('\n'.join([f"H{start+hole+1}: {dist}" for hole, dist in enumerate(holes)]))
+            dists = self.distances[c*holes_per_column:(c+1)*holes_per_column]
+            pars = self.pars[c*holes_per_column:(c+1)*holes_per_column]
+            hole_columns.append('\n'.join([f"H{start+i+1} p{pars[i]} {dists[i]}" for i, _ in enumerate(dists)]))
         return hole_columns
     
     def score_rating(self, score: int) -> int:
-        return int(self.par_rating - (score * self.stroke_value)),
+        return self.par_rating - score * self.stroke_value
     
     def calculate_variance(self) -> int:
         distances = [x.total_distance for x in self.layouts]
@@ -108,9 +124,37 @@ class AggregateLayout:
         return (f"Par {self.total_par}, Distance {self.total_distance} feet")
     
     def layout_links(self) -> list[str]:
-        return []
+        event_ids = set([x.event_id for x in self.rounds])
+        return [f"[{x}]({to_pdgalive_link(x)})" for x in event_ids]
 
-def filter_layouts(layouts_rounds: list[tuple[Layout, Round, list[Score]]]) -> list[tuple[Layout, Round, list[Score]]]:
+def cluster_rounds(rounds: list[Round], maxgap):
+    if not rounds:
+        return []  # Return an empty list for empty input
+
+    # Extract the attribute values
+    distances = [x.layout.total_distance for x in rounds]
+
+    # Perform hierarchical clustering
+    linkage_matrix = linkage([[x] for x in distances], method='single')
+    cluster_labels = fcluster(linkage_matrix, t=maxgap, criterion='distance')
+
+    # Group objects based on cluster labels
+    clusters = {}
+    for round, label in zip(rounds, cluster_labels):
+        clusters.setdefault(label, []).append(round)
+
+    # Convert clusters to ranges of `total_distance`
+    ranges = [
+        (
+            min(x.layout.total_distance for x in cluster),
+            max(x.layout.total_distance for x in cluster),
+        )
+        for cluster in clusters.values()
+    ]
+
+    return list(clusters.values()), ranges
+
+def filter_rounds(rounds: list[Round]) -> list[Round]:
     """
     Filters out layouts that do not have necessary data to be aggregated
     Args:
@@ -118,23 +162,24 @@ def filter_layouts(layouts_rounds: list[tuple[Layout, Round, list[Score]]]) -> l
     Returns:
         list[Layout]: A list of Layout objects with complete distances, pars, total distance, etc.
     """
-    filtered_layouts = []
-    for layout_round in layouts_rounds:
-        layout = layout_round[0]
-        hole_distances: list[str] = layout.distances.split(',')
-        pars: list[str] = layout.pars.split(',')
+    filtered_rounds = []
+    for round in rounds:
+        # print(json.dumps(round.layout.to_dict(), indent=4))
+        layout: Layout = round.layout
+        hole_distances: list[str] = layout.distances.split(', ')
+        pars: list[str] = layout.pars.split(', ')
         if len(hole_distances) != layout.num_holes:
             continue
         if len(pars) != layout.num_holes:
             continue
-        if not all(hole_distances, lambda x: x.isdigit()):
+        if not all(x.isdigit() for x in hole_distances):
             continue
-        if not all(pars, lambda x: x.isdigit()):
+        if not all(x.isdigit() for x in pars):
             continue
-        filtered_layouts.append(layout_round)
-    return filtered_layouts
+        filtered_rounds.append(round)
+    return filtered_rounds
     
-def aggregate_layouts(layouts_rounds: list[tuple[Layout, Round, list[Score]]], threshold: int = 0.5) -> list[AggregateLayout]:
+def aggregate_layouts(rounds: list[Round], threshold: int = 0.5) -> list[AggregateLayout]:
     """
     Groups rounds into comparable layouts based on their hole distances, total distance, and par.
     Args:
@@ -142,26 +187,29 @@ def aggregate_layouts(layouts_rounds: list[tuple[Layout, Round, list[Score]]], t
     Returns:
         list[Layout]: A list of Layout objects, each representing a group of comparable rounds.
     """
-    layout_groups: list[AggregateLayout] = []
+    if not rounds:
+        return []
+    aggregated_layouts: list[AggregateLayout] = []
+    rounds = filter_rounds(rounds)
+    clustered_rounds, ranges = cluster_rounds(rounds, 200)
 
     # BETTER SOLUTION
     # 1. remove layouts without distance data
     # 2. group layouts based on pars
     # 3. remove distance outliers
     # 
+    rounds.sort(key=lambda x: x.layout.pars)
+    for cluster in clustered_rounds:
+        for _, group in itertools.groupby(cluster, key=lambda x: x.layout.pars):
+            group_list = list(group)
 
-    layouts_rounds = filter_layouts(layouts_rounds)
-    layouts_rounds.sort(key=lambda x: x[0].pars)
-    for _, group in itertools.groupby(layouts_rounds, key=lambda x: x[0].pars):
-        group_list = list(group)
+            # TODO remove distance outliers
+            if len(group_list) == 0:
+                continue
 
-        # TODO remove distance outliers
-        if len(group_list) == 0:
-            continue
+            layout = AggregateLayout(group_list)
+            aggregated_layouts.append(layout)
 
-        layout = AggregateLayout(group_list)
-        layout_groups.append(layout)
-
-    layout_groups.sort(key=lambda x: len(x.num_layouts), reverse=True)
-    return layout_groups
+    aggregated_layouts.sort(key=lambda x: x.num_layouts, reverse=True)
+    return aggregated_layouts
 

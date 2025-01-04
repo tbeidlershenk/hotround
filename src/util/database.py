@@ -6,7 +6,6 @@ from models.event import Event
 from models.layout import AggregateLayout, Layout, aggregate_layouts
 from models.round import Round
 from datetime import datetime
-
 from models.score import Score
 
 class Database:
@@ -98,25 +97,12 @@ class Database:
         
         course_name = course.course_name
         layouts_rounds = (
-            self.session.query(Round, Layout, Score)
-            .filter(Round.round_id == Layout.round_id)
-            .filter(Layout.round_id == Score.round_id)
+            self.session.query(Round)
             .join(Event, Round.event_id == Event.event_id)
             .filter(Event.course_name == course_name)
             .all()
         )
         data = aggregate_layouts(layouts_rounds)
-        return data
-    
-    def query_scores_for_aggregate_layout(self, aggregate_layout: AggregateLayout) -> list[Score]:
-        layouts = aggregate_layout.layouts
-        round_ids = [x.round_id for x in layouts]
-        data = (
-            self.session.query(Score)
-            .join(Layout, Layout.round_id == Score.round_id)
-            .filter(Layout.round_id in round_ids)
-            .all()
-        )
         return data
     
     def close(self) -> None:

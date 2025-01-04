@@ -15,10 +15,8 @@ class Score(Base):
     hole_scores = Column(String(200), nullable=True) 
     round = relationship('Round', back_populates='scores', foreign_keys=[round_id])
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
-            "score_id": self.score_id,
-            "round_id": self.round_id,
             "rating": self.rating,
             "score": self.score,
             "hole_scores": self.hole_scores,

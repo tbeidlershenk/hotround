@@ -1,10 +1,8 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey
+from sqlalchemy import Column, Integer, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base import Base
-from itertools import groupby
-import numpy as np
-from util.strings import to_pdgalive_link
-from logger import logger
+from models.event import Event
+from models.score import Score
 
 class Round(Base):
     __tablename__ = 'Rounds'
@@ -21,15 +19,16 @@ class Round(Base):
     layout = relationship('Layout', back_populates='round', uselist=False)
     scores = relationship('Score', back_populates='round')
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
-            "round_id": self.round_id,
             "round_number": self.round_number,
             "num_players": self.num_players,
             "high_rating": self.high_rating,
             "low_rating": self.low_rating,
             "par_rating": self.par_rating,
             "stroke_value": self.stroke_value,
-            "event_id": self.event_id
+            "event": self.event.to_dict(),
+            "layout": self.layout.to_dict(),
+            "scores": [x.to_dict() for x in self.scores]
         }
     

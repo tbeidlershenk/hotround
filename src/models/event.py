@@ -10,9 +10,10 @@ class Event(Base):
     course = relationship('Course', back_populates='events')
     rounds = relationship('Round', back_populates='event')
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "event_id": self.event_id,
             "date": self.date,
-            "course_name": self.course_name
+            "course_name": self.course_name,
+            "course": self.course.to_dict(),
         }

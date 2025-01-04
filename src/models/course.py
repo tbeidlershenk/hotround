@@ -8,7 +8,7 @@ class Course(Base):
     readable_course_name = Column(String(100), nullable=False)
     events = relationship('Event', back_populates='course')
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "course_name": self.course_name,
             "readable_course_name": self.readable_course_name
