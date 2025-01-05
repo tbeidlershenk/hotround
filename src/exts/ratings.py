@@ -92,7 +92,7 @@ async def ratings(
     aggregate_layouts.sort(key=lambda x: x.score_layout_tokens(layout_keywords), reverse=True)
     embeds = [
         disnake.Embed.from_dict({
-            "title": f"{score if score < 0 else '+' + str(score) if score > 0 else 'E'} is {layout.score_rating(score)} rated",
+            "title": f"{score if score < 0 else '+' + str(score) if score > 0 else 'E'} is **{layout.score_rating(score)} rated**",
             "color": 0x008E6F,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
@@ -101,18 +101,9 @@ async def ratings(
                 "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
             },
             "description": f"""
-                **__{course_name}__**
-                *{layout.descriptive_name}*
-                **{layout.total_distance}'**, par **{layout.total_par}**
-
-                {layout_to_str(layout, num_results=3)}
-                ...
-
-                Calculated from **{layout.num_layouts}** rounds
-                Events: **{COMMASPACE.join(layout.layout_links()[:5])}**
-            """,
+                **__{course_name}__**\n*{layout.descriptive_name}*\n**{layout.total_distance}'**, par **{layout.total_par}**\n{layout_to_str(layout, num_results=3)}...\n\nCalculated from **{layout.num_layouts}** rounds\nEvents: **{COMMASPACE.join(layout.layout_links()[:5])}**\n\n*Wrong layout? Click below :)*""",
             "footer": {
-                "text": f"Showing result {i+1} of {num_results}"
+                "text": f"Result {i+1} of {num_results}"
             }
         }) 
         for i, layout in enumerate(aggregate_layouts)]
