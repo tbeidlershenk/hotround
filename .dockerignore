@@ -6,6 +6,8 @@ Dockerfile*
 .gitignore
 .env
 .DS_Store
+config/
+data/
 __pycache__/
 LICENSE
 venv

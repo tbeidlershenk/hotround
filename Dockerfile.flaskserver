@@ -11,7 +11,5 @@ COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY --from=site /app/site/ ./site
 ADD src/ ./src
-ADD data/ ./data
-ADD config/ ./config
 EXPOSE 5001
-CMD ["python3", "src/server.py", "config/dev.json"]
+CMD ["python3", "src/server.py", "config/prod.json"]
