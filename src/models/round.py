@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base import Base
-from models.event import Event
-from models.score import Score
 
 class Round(Base):
     __tablename__ = 'Rounds'

@@ -1,10 +1,6 @@
 from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base import Base
-from itertools import groupby
-import numpy as np
-from util.strings import to_pdgalive_link
-from logger import logger
 
 class Score(Base):
     __tablename__ = 'Scores'

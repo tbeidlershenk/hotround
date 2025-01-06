@@ -1,5 +1,3 @@
-import json
-from turtle import xcor
 from sqlalchemy import Column, Integer, String
 from models.base import Base
 import itertools
@@ -39,23 +37,29 @@ class AggregateLayout:
         """
         self.rounds = rounds
         self.layouts = [x.layout for x in rounds]
-        self.scores = itertools.chain([x.scores for x in rounds])
+        self.scores = list(itertools.chain.from_iterable([x.scores for x in rounds]))
         self.num_layouts = len(self.layouts)
+        self.num_rounds = len(self.layouts)
         self.num_tournaments = len(set([x.event_id for x in rounds]))
         self.num_holes = self.layouts[0].num_holes
-        self.distances = self.averaged_distances()
+        self.distances = self.get_averaged_distances()
         self.total_distance = int(np.mean([x.total_distance for x in self.layouts]))
         self.pars = [int(x) for x in self.layouts[0].pars.split(', ')]
         self.total_par = self.layouts[0].total_par
         self.layout_names = [x.layout_name for x in self.layouts]
+        self.layout_names_and_links = self.get_layout_names_and_links()
         self.layout_tokens = self.tokenize_layout_names()
         self.descriptive_name = self.get_descriptive_name()
         self.par_rating = int(np.mean([x.par_rating for x in self.rounds]))
         self.stroke_value = int(np.mean([x.stroke_value for x in self.rounds]))
+        self.averaged_hole_scores = self.get_averaged_hole_scores()
+        self.total_score_distribution = self.get_total_score_distribution()
+
 
     def to_dict(self) -> dict:
         return {
             "num_layouts": self.num_layouts,
+            "num_rounds": self.num_rounds,
             "num_tournaments": self.num_tournaments,
             "num_holes": self.num_holes,
             "distances": self.distances,
@@ -63,13 +67,35 @@ class AggregateLayout:
             "pars": self.pars,
             "total_par": self.total_par,
             "layout_names": self.layout_names,
+            "layout_names_and_links": self.layout_names_and_links,
             "layout_tokens": self.layout_tokens,
             "descriptive_name": self.descriptive_name,
             "par_rating": self.par_rating,
-            "stroke_value": self.stroke_value
+            "stroke_value": self.stroke_value,
+            "averaged_hole_scores": self.averaged_hole_scores,
+            "total_score_distribution": self.total_score_distribution
         }
 
-    def averaged_distances(self) -> list[int]:
+    def get_averaged_hole_scores(self) -> list[float]:
+        scores = []
+        int_scores = [[int(y) for y in x.hole_scores.split(', ')] for x in self.scores]
+        for x in range(self.num_holes):
+            hole_scores = [y[x] for y in int_scores]
+            averaged_score = np.mean(hole_scores).round(2)
+            scores.append(averaged_score)
+        return scores
+    
+    def get_total_score_distribution(self) -> list[dict]:
+        distribution = []
+        scores = [x.score for x in self.scores]
+        for score in set(scores):
+            distribution.append({
+                "score": score,
+                "count": scores.count(score)
+            })
+        return distribution
+
+    def get_averaged_distances(self) -> list[int]:
         str_distances = [x.distances.split(', ') for x in self.layouts]
         int_distances = [[int(x) for x in y] for y in str_distances]
         distances = []
@@ -83,6 +109,21 @@ class AggregateLayout:
         filtered_tokens = [token for token in filtered_tokens if not token.isnumeric()]
         return ', '.join(filtered_tokens[0:5])
     
+    def get_layout_names_and_links(self) -> list[dict]:
+        data = {}
+        for round in self.rounds:
+            layout_name = round.layout.layout_name
+            if round.layout.layout_name in data:
+                data[layout_name].append(round)
+            else:
+                data[layout_name] = [round]
+        names_and_links = [{
+            "name": x,
+            "link": to_pdgalive_link(data[x][0].event_id),
+            "num_rounds": len(data[x])
+        } for x in data]
+        return names_and_links
+
     def tokenize_layout_names(self) -> list[str]:
         tokens = []
         frequencies = {}
@@ -101,17 +142,6 @@ class AggregateLayout:
     def score_layout_tokens(self, keywords: list[str]) -> int:
         # TODO need more sophisticated algorithm
         return len([x for x in keywords if x.lower() in self.layout_tokens])
-
-    def hole_distances(self, columns: int = 3) -> list[str]:
-        holes_per_column = (len(self.distances) // columns)
-        holes_per_column += 1 if len(self.distances) % columns != 0 else 0
-        hole_columns = []
-        for c in range(columns):
-            start = c*holes_per_column
-            dists = self.distances[c*holes_per_column:(c+1)*holes_per_column]
-            pars = self.pars[c*holes_per_column:(c+1)*holes_per_column]
-            hole_columns.append('\n'.join([f"H{start+i+1} p{pars[i]} {dists[i]}" for i, _ in enumerate(dists)]))
-        return hole_columns
     
     def score_rating(self, score: int) -> int:
         return self.par_rating - score * self.stroke_value
@@ -119,9 +149,6 @@ class AggregateLayout:
     def calculate_variance(self) -> int:
         distances = [x.total_distance for x in self.layouts]
         return int(np.std(distances))
-    
-    def course_metadata(self) -> str:
-        return (f"Par {self.total_par}, Distance {self.total_distance} feet")
     
     def layout_links(self) -> list[str]:
         event_ids = set([x.event_id for x in self.rounds])
