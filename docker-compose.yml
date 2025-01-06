@@ -1,13 +1,15 @@
 services:
     flaskserver:
+        image: tbeidlershenk/flaskserver:latest
         build:
             context: .
             dockerfile: Dockerfile.flaskserver
         ports:
-            - "80:80"
+            - "5001:5001"
         command: ["python3", "src/server.py", "config/prod.json"]
 
     discordbot:
+        image: tbeidlershenk/discordbot:latest
         build:
             context: .
             dockerfile: Dockerfile.discordbot

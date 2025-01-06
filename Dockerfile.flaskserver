@@ -8,10 +8,10 @@ RUN npm run build
 FROM python:3.9-slim
 WORKDIR /app
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY --from=site /app/site/ ./site
 ADD src/ ./src
 ADD data/ ./data
 ADD config/ ./config
-EXPOSE 80
+EXPOSE 5001
 CMD ["python3", "src/server.py", "config/dev.json"]

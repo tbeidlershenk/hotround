@@ -58,6 +58,6 @@ if __name__ == "__main__":
     config_file_path = sys.argv[1]
     load_config_into_env(config_file_path)
     if os.getenv("debug") == "True":
-        app.run(host='0.0.0.0', port=80)
+        app.run(host='0.0.0.0', port=5001)
     else:
-        serve(app, host='0.0.0.0', port=80)
+        serve(app, host='0.0.0.0', port=5001)
