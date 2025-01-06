@@ -1,6 +1,5 @@
 import Table from "@mui/joy/Table";
 import Card from "@mui/joy/Card";
-import Link from "@mui/joy/Link";
 import Sheet from "@mui/joy/Sheet";
 
 export default function SearchedLayoutsCard({ rows }) {

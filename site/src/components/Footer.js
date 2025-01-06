@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, IconButton } from "@mui/joy";
+import { Box } from "@mui/joy";
 import Typography from "@mui/joy/Typography";
 import Link from "@mui/joy/Link";
 

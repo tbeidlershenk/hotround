@@ -3,14 +3,12 @@ import Grid from "@mui/joy/Grid";
 import Typography from "@mui/joy/Typography";
 import Autocomplete from "@mui/joy/Autocomplete";
 import { createFilterOptions } from "@mui/material/Autocomplete";
-import Button from "@mui/joy/Button";
 import Input from "@mui/joy/Input";
+import Button from "@mui/joy/Button";
 import { Box, ListItem } from "@mui/joy";
 import UsedLayoutsCard from "./cards/UsedLayoutsCard";
 import HorizontalCourseCard from "./cards/HorizontalCourseCard";
 import RatingStatsCard from "./cards/RatingStatsCard";
-import Pagination from "./components/Pagination";
-import Status from "./Status";
 import LayoutOption from "./components/LayoutOption";
 
 const status_none = -1;
@@ -23,9 +21,9 @@ export default function RatingCalculator({ courseOptions }) {
     const [course, setCourse] = React.useState("");
     const [layout, setLayout] = React.useState(null);
     const [score, setScore] = React.useState(0);
-    const [layoutOptions, setLayoutOptions] = React.useState([]);
+    // Represents the status of the last API call
     const [status, setStatus] = React.useState(status_none);
-    const [currentPage, setCurrentPage] = React.useState(0);
+    const [layoutOptions, setLayoutOptions] = React.useState([]);
 
     console.log("STATE");
     console.log("---------------------------");
@@ -34,7 +32,6 @@ export default function RatingCalculator({ courseOptions }) {
     console.log("Score ", score);
     console.log("Layout options ", layoutOptions);
     console.log("Status ", status);
-    console.log("Current page ", currentPage);
     console.log("---------------------------");
     console.log("");
 
@@ -56,7 +53,9 @@ export default function RatingCalculator({ courseOptions }) {
         fetch(`/api/rating/${course}`, { method: "GET" })
             .then((response) => response.json())
             .then((data) => {
-                setLayoutOptions(data);
+                console.log(data);
+                setStatus(data.status);
+                setLayoutOptions(data.layouts);
             })
             .catch((error) => {
                 console.error("Error fetching layouts:", error);
@@ -66,46 +65,44 @@ export default function RatingCalculator({ courseOptions }) {
         setCourse(course);
     }
 
-    function handleSubmit() {
-        console.log(course, layout, score);
-
-        if (!course || !layout) {
-            return;
-        }
-
-        setStatus(layout.status);
-    }
-
     function body() {
-        if (status == status_none) {
+        if (status === status_none) {
             return (
                 <Typography variant="body1" align="center">
                     No results to display. Please enter your search criteria.
                 </Typography>
             );
         } else if (status === status_success) {
+            if (!layout) {
+                return (
+                    <Typography variant="body1" align="center">
+                        Please select a layout.
+                    </Typography>
+                );
+            }
             return (
                 <Grid container spacing={2} sx={{ justifyContent: "center" }}>
-                    <Grid item xs={12} sm={12} md={12} lg={12}>
-                        <Typography>
-                            Returned {layoutOptions.length} results. Displaying result {currentPage + 1} of {layoutOptions.length}.
-                        </Typography>
+                    <Grid item xs={12} sm={6} md={6} lg={6}>
+                        <RatingStatsCard layout={layout} score={score} />
                     </Grid>
                     <Grid item xs={12} sm={6} md={6} lg={6}>
-                        <RatingStatsCard data={layout} score={score} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={6}>
-                        <UsedLayoutsCard rows={layout.layouts} />
+                        <UsedLayoutsCard layout_names_and_links={layout.layout_names_and_links} />
                     </Grid>
                     <Grid item sm={12} md={12} lg={12}>
-                        <HorizontalCourseCard rows={layout.layout_hole_distances} />
+                        <HorizontalCourseCard layout={layout} />
                     </Grid>
                 </Grid>
+            );
+        } else if (status === status_error_no_matches) {
+            return (
+                <Typography variant="body1" align="center">
+                    No PDGA sanctioned tournaments found for this course.
+                </Typography>
             );
         } else {
             return (
                 <Typography variant="body1" align="center">
-                    Failed: {status}
+                    Failed: status_{status}
                 </Typography>
             );
         }
@@ -143,14 +140,13 @@ export default function RatingCalculator({ courseOptions }) {
                         }}
                         options={layoutOptions}
                         defaultValue={layoutOptions.length > 0 ? layoutOptions[0] : null}
-                        getOptionLabel={(option) => (typeof option === "string" ? option : option.layout_name)}
+                        getOptionLabel={(layout) => (typeof layout === "string" ? layout : layout.descriptive_name)}
                         onChange={(_, value) => {
                             setLayout(value);
-                            handleSubmit();
                         }}
-                        renderOption={(props, option) => (
+                        renderOption={(props, layout) => (
                             <ListItem {...props}>
-                                <LayoutOption option={option} />
+                                <LayoutOption layout={layout} />
                             </ListItem>
                         )}
                         variant="outlined"
@@ -158,7 +154,7 @@ export default function RatingCalculator({ courseOptions }) {
                         autoHightlight
                     />
                 </Grid>
-                <Grid item xs={10} sm={2.5}>
+                <Grid item xs={5} sm={2.5}>
                     <Input
                         label="Score (relative to par)"
                         name="score"
@@ -178,7 +174,6 @@ export default function RatingCalculator({ courseOptions }) {
                             } else {
                                 setScore(parseInt(event.target.value));
                             }
-                            handleSubmit();
                         }}
                         variant="outlined"
                         color="primary"

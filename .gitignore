@@ -3,7 +3,6 @@ node_modules/
 test/
 data/
 config/
-scripts/
 __pycache__/
 ratings.log
 .DS_Store
