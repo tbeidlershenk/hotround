@@ -3,7 +3,7 @@ import Card from "@mui/joy/Card";
 import Link from "@mui/joy/Link";
 import Sheet from "@mui/joy/Sheet";
 
-export default function UsedLayoutsCard({ rows }) {
+export default function UsedLayoutsCard({ layout_names_and_links }) {
     return (
         <Card variant="outlined" sx={{ flex: 1, padding: 0 }}>
             <Sheet
@@ -40,14 +40,14 @@ export default function UsedLayoutsCard({ rows }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {rows
+                        {layout_names_and_links
                             .sort((a, b) => b.num_rounds - a.num_rounds)
-                            .map((row) => (
+                            .map((x) => (
                                 <tr>
                                     <td style={{ width: "80%" }}>
-                                        <Link href={row.pdga_live_link}>{row.layout_name}</Link>
+                                        <Link href={x.link}>{x.name}</Link>
                                     </td>
-                                    <td style={{ textAlign: "right" }}>{row.num_rounds}</td>
+                                    <td style={{ textAlign: "right" }}>{x.num_rounds}</td>
                                 </tr>
                             ))}
                     </tbody>

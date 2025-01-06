@@ -1,8 +1,5 @@
 import * as React from "react";
-import { useColorScheme } from "@mui/joy/styles";
-import IconButton, { IconButtonProps } from "@mui/joy/IconButton";
-import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
-import LightModeIcon from "@mui/icons-material/LightMode";
+import IconButton from "@mui/joy/IconButton";
 import { Help } from "@mui/icons-material";
 import { Modal, Box, Typography } from "@mui/joy";
 

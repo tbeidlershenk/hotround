@@ -2,18 +2,18 @@ import * as React from "react";
 import Typography from "@mui/joy/Typography";
 import Card from "@mui/joy/Card";
 
-export default function LayoutOption({ option }) {
+export default function LayoutOption({ layout }) {
     return (
         <Card variant="outlined" sx={{ padding: 2, flex: 1 }}>
-            <Typography variant="h6">{option.layout_name}</Typography>
+            <Typography variant="h6">{layout.descriptive_name}</Typography>
             <Typography>
                 {"Par "}
-                <Typography fontWeight={"bold"}>{option.layout_par}</Typography>
+                <Typography fontWeight={"bold"}>{layout.total_par}</Typography>
                 {" • "}
-                <Typography fontWeight={"bold"}>{option.layout_total_distance}</Typography>
+                <Typography fontWeight={"bold"}>{layout.total_distance}</Typography>
                 {" ft"}
                 {" • "}
-                <Typography fontWeight={"bold"}>{option.num_holes}</Typography>
+                <Typography fontWeight={"bold"}>{layout.num_holes}</Typography>
                 {" holes"}
             </Typography>
         </Card>

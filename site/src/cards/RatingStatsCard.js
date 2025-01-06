@@ -16,12 +16,12 @@ function format_score(score) {
     }
 }
 
-function format_rating(data, score) {
-    const rating = data.par_rating - score * data.stroke_value;
+function format_rating(layout, score) {
+    const rating = layout.par_rating - score * layout.stroke_value;
     return Math.round(rating);
 }
 
-export default function RatingStatsCard({ data, score }) {
+export default function RatingStatsCard({ layout, score }) {
     return (
         <Card variant="outlined" sx={{ flex: 1, padding: 2, height: "400px" }}>
             <Box>
@@ -50,7 +50,7 @@ export default function RatingStatsCard({ data, score }) {
                     }}
                 >
                     <Typography level="title-md" sx={{ color: "white" }}>
-                        {format_rating(data, score)}
+                        {format_rating(layout, score)}
                     </Typography>
                 </Box>
                 <Box
@@ -63,23 +63,60 @@ export default function RatingStatsCard({ data, score }) {
                     }}
                 >
                     <Typography>
-                        Total <Typography fontWeight={"bold"}>{data.layout_par + score}</Typography> • Par{" "}
-                        <Typography fontWeight={"bold"}>{data.layout_par}</Typography> • Dist{" "}
-                        <Typography fontWeight={"bold"}>{data.layout_total_distance}</Typography>
+                        Total <Typography fontWeight={"bold"}>{layout.total_par + score}</Typography> • Par{" "}
+                        <Typography fontWeight={"bold"}>{layout.total_par}</Typography> • Dist{" "}
+                        <Typography fontWeight={"bold"}>{layout.total_distance}</Typography>
                     </Typography>
                 </Box>
             </Box>
             <LineChart
-                xAxis={[{ scaleType: "band", dataKey: "round_rating" }]}
-                dataset={data.rounds.sort((a, b) => a.round_rating - b.round_rating)}
-                series={[{ dataKey: "num_rounds" }]}
+                xAxis={[
+                    {
+                        scaleType: "band",
+                        dataKey: "score",
+                        label: "Score",
+                        tickSize: 10, // Adjust tick size
+                        style: {
+                            fontSize: "12px",
+                            fill: "#6b7280", // Subtle gray color for labels
+                        },
+                        interval: 0, // Show all labels by default
+                        tickFormatter: (value, index, totalTicks) =>
+                            totalTicks > 10 && index % Math.ceil(totalTicks / 10) !== 0 ? "" : value, // Skip some labels if overcrowded
+                    },
+                ]}
+                yAxis={[
+                    {
+                        label: "Count",
+                        style: {
+                            fontSize: "12px",
+                            fill: "#6b7280",
+                        },
+                        tickSize: 10, // Adjust tick size
+                    },
+                ]}
+                dataset={layout.total_score_distribution.sort((a, b) => b.score - a.score)}
+                series={[
+                    {
+                        dataKey: "count",
+                        style: {
+                            stroke: "#3b82f6", // Use a blue color for the line
+                            strokeWidth: 2,
+                        },
+                    },
+                ]}
                 height={300}
-                grid={{ vertical: true, horizontal: true }}
-                tooltip={{ trigger: "none" }}
+                grid={{
+                    vertical: true,
+                    horizontal: true,
+                    stroke: "#e5e7eb", // Subtle gray grid lines
+                    strokeWidth: 1,
+                }}
+                tooltip={{ trigger: "none" }} // No tooltip for now
             />
+
             <Typography sx={{ fontFamily: '"Source Sans 3", sans-serif' }}>
-                Averaged over <Typography fontWeight={"bold"}>{data.rounds.length}</Typography> rounds. You scored in the top{" "}
-                <Typography fontWeight={"bold"}>{data.percentile}%!</Typography>
+                Averaged over <Typography fontWeight={"bold"}>{layout.num_rounds}</Typography> rounds.
             </Typography>
         </Card>
     );
