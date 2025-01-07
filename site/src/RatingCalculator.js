@@ -41,7 +41,6 @@ export default function RatingCalculator({ courseOptions }) {
     async function handleCourseChange(course) {
         // Reset all state
         setLayout(null);
-        setScore(0);
         setStatus(status_none);
 
         if (!course || course === "") {

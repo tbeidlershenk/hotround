@@ -5,7 +5,7 @@ from disnake.ext import commands
 from fuzzywuzzy import fuzz, process
 from logger import logger
 from Paginator import CreatePaginator
-from bot import CaddieBot
+from bot import HotRoundBot
 from models.layout import AggregateLayout
 import disnake
 from disnake.ext import commands
@@ -47,7 +47,7 @@ async def ratings(
     Returns:
         None
     """
-    bot: CaddieBot = plugin.bot
+    bot: HotRoundBot = plugin.bot
     all_course_names = [course.readable_course_name for course in bot.database.query_courses()]
     scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
     
@@ -60,8 +60,8 @@ async def ratings(
             "color": 0x1491A0,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
-                "name": "CaddieBot",
-                "url": "https://www.pdga.com/",
+                "name": "HotRound",
+                "url": "https://hotround.ddns.net",
                 "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
             },
             "fields": [
@@ -81,8 +81,8 @@ async def ratings(
             "color": 0x1491A0,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
-                "name": "CaddieBot",
-                "url": "https://www.pdga.com/",
+                "name": "HotRound",
+                "url": "https://hotround.ddns.net",
                 "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
             }
         }), ephemeral=False)
@@ -96,8 +96,8 @@ async def ratings(
             "color": 0x008E6F,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
-                "name": "CaddieBot",
-                "url": "https://www.pdga.com/",
+                "name": "HotRound",
+                "url": "https://hotround.ddns.net",
                 "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
             },
             "description": f"""

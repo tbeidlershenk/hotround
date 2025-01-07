@@ -8,3 +8,9 @@ def load_config_into_env(config_file_path: str) -> None:
         if value is None:
             continue
         os.environ[key] = str(value)
+
+def load_config_into_env_from_dict(config: dict) -> None:
+    for key, value in config.items():
+        if value is None:
+            continue
+        os.environ[key] = str(value)

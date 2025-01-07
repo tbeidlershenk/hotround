@@ -11,6 +11,7 @@ function App() {
     const [courseOptions, setCourseOptions] = React.useState([]);
 
     React.useEffect(() => {
+        document.title = "HotRound";
         fetch("/api/courses", { method: "GET" })
             .then((response) => response.json())
             .then((data) => {

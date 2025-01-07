@@ -1,5 +1,6 @@
+from line_profiler import profile
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, joinedload
 from models.base import Base
 from models.course import Course
 from models.event import Event
@@ -48,10 +49,12 @@ class Database:
         self.session.query(Event).filter_by(event_id=event_id).delete()
         self.session.commit()
     
+    @profile
     def query_courses(self) -> list[Course]:
         data = self.session.query(Course).all()
         return data
     
+    @profile
     def query_courses_with_no_events(self) -> list[Course]:
         subquery = self.session.query(Event.course_name).distinct()
         data = (
@@ -61,10 +64,12 @@ class Database:
         )
         return data
     
+    @profile
     def query_events(self) -> list[Event]:
         data = self.session.query(Event).all()
         return data
     
+    @profile
     def query_events_with_no_rounds(self) -> list[Event]:
         subquery = self.session.query(Round.event_id).distinct()
         data = (
@@ -74,6 +79,7 @@ class Database:
         )
         return data
     
+    @profile
     def query_rounds_for_course(self, readable_course_name: str) -> list[Round]:
         course = self.session.query(Course).filter(Course.readable_course_name.ilike(readable_course_name)).first()
         
@@ -83,12 +89,13 @@ class Database:
         course_name = course.course_name
         data = (
             self.session.query(Round)
-            .join(Event, Round.event_id == Event.event_id)
             .filter(Event.course_name == course_name)
+            .join(Event, Round.event_id == Event.event_id)
             .all()
         )
         return data
     
+    @profile
     def query_aggregate_layouts(self, readable_course_name: str) -> list[AggregateLayout]:
         course = self.session.query(Course).filter(Course.readable_course_name.ilike(readable_course_name)).first()
         
@@ -98,8 +105,9 @@ class Database:
         course_name = course.course_name
         layouts_rounds = (
             self.session.query(Round)
-            .join(Event, Round.event_id == Event.event_id)
             .filter(Event.course_name == course_name)
+            .join(Event, Round.event_id == Event.event_id)
+            .options(joinedload(Round.scores), joinedload(Round.layout))
             .all()
         )
         data = aggregate_layouts(layouts_rounds)

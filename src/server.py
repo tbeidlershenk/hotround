@@ -2,6 +2,7 @@ import sys
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
+from line_profiler import profile
 from util.configuration import load_config_into_env
 from util.database import Database
 from waitress import serve
@@ -29,7 +30,7 @@ def courses():
     return jsonify([course.readable_course_name for course in courses])
 
 @app.route('/api/rating/<course_name>', methods=['GET'])
-def new_rating(course_name: str):
+def rating(course_name: str):
     db = Database(os.getenv("db_connection"))
     aggregated_layouts = db.query_aggregate_layouts(course_name)
     num_results = len(aggregated_layouts)

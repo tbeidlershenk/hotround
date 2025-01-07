@@ -5,8 +5,8 @@ from models.base import Base
 class Round(Base):
     __tablename__ = 'Rounds'
     round_id = Column(Integer, primary_key=True, autoincrement=True)
-    event_id = Column(Integer, ForeignKey('Events.event_id', ondelete='CASCADE'), nullable=False)
-    layout_id = Column(Integer, ForeignKey('Layouts.layout_id', ondelete='CASCADE'), nullable=False)
+    event_id = Column(Integer, ForeignKey('Events.event_id', ondelete='CASCADE'), nullable=False, index=True)
+    layout_id = Column(Integer, ForeignKey('Layouts.layout_id', ondelete='CASCADE'), nullable=False, index=True)
     round_number = Column(Integer, nullable=False)
     num_players = Column(Integer, nullable=False)
     high_rating = Column(Integer, nullable=False)

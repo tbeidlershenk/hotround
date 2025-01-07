@@ -1,3 +1,4 @@
+from line_profiler import profile
 from sqlalchemy import Column, Integer, String
 from models.base import Base
 import itertools
@@ -6,6 +7,7 @@ import numpy as np
 from models.round import Round
 from scipy.cluster.hierarchy import linkage, fcluster
 
+from models.score import Score
 from util.strings import to_pdgalive_link
 
 class Layout(Base):
@@ -76,15 +78,26 @@ class AggregateLayout:
             "total_score_distribution": self.total_score_distribution
         }
 
+    def get_scores(self) -> list[Score]:
+        scores = []
+        for round in self.rounds:
+            scores.extend(round.scores)
+        return scores
+
     def get_averaged_hole_scores(self) -> list[float]:
         scores = []
-        int_scores = [[int(y) for y in x.hole_scores.split(', ')] for x in self.scores]
+        int_scores = []
+        for score in self.scores:
+            parsed_scores = [int(y) for y in score.hole_scores.split(', ')]
+            if len(parsed_scores) != self.num_holes:
+                continue
+            int_scores.append(parsed_scores)
         for x in range(self.num_holes):
             hole_scores = [y[x] for y in int_scores]
             averaged_score = np.mean(hole_scores).round(2)
             scores.append(averaged_score)
         return scores
-    
+
     def get_total_score_distribution(self) -> list[dict]:
         distribution = []
         scores = [x.score for x in self.scores]
@@ -235,6 +248,11 @@ def aggregate_layouts(rounds: list[Round], threshold: int = 0.5) -> list[Aggrega
                 continue
 
             layout = AggregateLayout(group_list)
+            if layout.total_distance == 0:
+                continue
+            if layout.total_par == 0:
+                continue
+
             aggregated_layouts.append(layout)
 
     aggregated_layouts.sort(key=lambda x: x.num_layouts, reverse=True)

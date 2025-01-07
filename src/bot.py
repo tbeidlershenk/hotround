@@ -6,7 +6,7 @@ from util.configuration import load_config_into_env
 from util.database import Database
 from logger import logger
 
-class CaddieBot(commands.InteractionBot):
+class HotRoundBot(commands.InteractionBot):
     def __init__(self, **options):
         super().__init__(**options)
         self.database = Database(os.getenv('db_connection'))
@@ -16,7 +16,7 @@ class CaddieBot(commands.InteractionBot):
 
 async def main():
     bot_token = os.getenv("bot_token")
-    bot = CaddieBot()
+    bot = HotRoundBot()
     bot.load_extension('exts.ratings', package='exts')
     bot.load_extension('exts.status', package='exts')
 

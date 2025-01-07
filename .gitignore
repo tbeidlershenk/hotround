@@ -12,6 +12,9 @@ Pipfile
 ngrok_config.yml
 update_pi_config.sh
 *.ipynb
+performance.py
+performance.py.lprof
+indexing.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

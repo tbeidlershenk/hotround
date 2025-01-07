@@ -33,7 +33,7 @@ export default function Header() {
                 }}
             >
                 <Typography component="h1" sx={{ fontWeight: "xl" }}>
-                    PDGA Rating Calculator
+                    HotRound
                 </Typography>
             </Box>
             <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
