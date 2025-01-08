@@ -20,7 +20,6 @@ from datetime import datetime
 from itertools import product
 from logger import logger
 import traceback
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 

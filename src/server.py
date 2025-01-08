@@ -2,7 +2,6 @@ import sys
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-from line_profiler import profile
 from util.configuration import load_config_into_env
 from util.database import Database
 from waitress import serve

@@ -1,4 +1,3 @@
-from line_profiler import profile
 from sqlalchemy import Column, Integer, String
 from models.base import Base
 import itertools
