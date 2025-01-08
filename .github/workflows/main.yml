@@ -27,7 +27,7 @@ jobs:
 
             - name: Run Docker Buildx Build and Push
               run: |
-                  docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 -t tbeidlershenk/flaskserver:latest -f Dockerfile.flaskserver .
+                  docker buildx build --platform linux/arm64 -t tbeidlershenk/flaskserver:latest -f Dockerfile.flaskserver .
                   docker push tbeidlershenk/flaskserver:latest
-                  docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 -t tbeidlershenk/discordbot:latest -f Dockerfile.discordbot .
+                  docker buildx build --platform linux/arm64 -t tbeidlershenk/discordbot:latest -f Dockerfile.discordbot .
                   docker push tbeidlershenk/discordbot:latest
