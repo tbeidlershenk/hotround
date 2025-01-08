@@ -25,9 +25,18 @@ jobs:
                   username: ${{ secrets.DOCKER_USERNAME }}
                   password: ${{ secrets.DOCKER_PASSWORD }}
 
-            - name: Run Docker Buildx Build and Push
+            - name: Build and Push Flask Server Image
               run: |
-                  docker buildx build --platform linux/arm64 -t tbeidlershenk/flaskserver:latest -f Dockerfile.flaskserver .
-                  docker push tbeidlershenk/flaskserver:latest
-                  docker buildx build --platform linux/arm64 -t tbeidlershenk/discordbot:latest -f Dockerfile.discordbot .
-                  docker push tbeidlershenk/discordbot:latest
+                  docker buildx build \
+                      --platform linux/arm64 \
+                      -t tbeidlershenk/flaskserver:latest \
+                      -f Dockerfile.flaskserver \
+                      --push .
+
+            - name: Build and Push Discord Bot Image
+              run: |
+                  docker buildx build \
+                      --platform linux/arm64 \
+                      -t tbeidlershenk/discordbot:latest \
+                      -f Dockerfile.discordbot \
+                      --push .
