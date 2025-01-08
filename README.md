@@ -2,7 +2,7 @@
 
 HotRound aggregates PDGA sanctioned tournament data to calculate accurate disc golf round ratings for casual, non-sanctioned rounds.
 
-~~Check it out at **[hotround.ddns.net](https://hotround.ddns.net)** !~~ Website in progress<br/>
+Check it out at **[hotround.ddns.net](https://hotround.ddns.net)** !<br/>
 Invite the bot to your Discord server **[here](https://discord.com/oauth2/authorize?client_id=1300645264591294475)**<br/>
 Kaggle dataset of all my data is **[here](https://www.kaggle.com/datasets/tobiasbeidlershenk/pdga-sanctioned-disc-golf-tournament-data)**
 
