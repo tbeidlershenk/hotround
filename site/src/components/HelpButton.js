@@ -37,8 +37,8 @@ export default function HelpButton(props) {
                         the links in the table.
                     </Typography>
                     <Typography>
-                        The database is not exhaustive and therefore may not contain data for every course and layout. In addition, courses
-                        without PDGA sanctioned tournaments cannot be rated.
+                        The database is not exhaustive and therefore may not contain data for every course and layout, and requires at least
+                        10 rounds for a layout.
                     </Typography>
                 </Box>
             </Modal>

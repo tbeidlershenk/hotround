@@ -33,9 +33,12 @@ def courses():
 def rating(course_name: str):
     db = Database(os.getenv("db_connection"))
     aggregated_layouts = db.query_aggregate_layouts(course_name)
-    num_results = len(aggregated_layouts)
+    db.close()
+
+    # TODO not sure if this is the best way to filter out weird data
+    returned_layouts = [x for x in aggregated_layouts if x.num_rounds >= 10]
+    num_results = len(returned_layouts)
     if num_results == 0:
-        db.close()
         return jsonify({
             "status": status_error_no_matches,
             "course_name": course_name,
@@ -43,12 +46,11 @@ def rating(course_name: str):
             "layouts": []
         }), 200
     
-    db.close()
     return jsonify({
         "status": status_success,
         "course_name": course_name,
         "num_results": num_results,
-        "layouts": [x.to_dict() for x in aggregated_layouts]
+        "layouts": [x.to_dict() for x in returned_layouts]
     }), 200
     
 if __name__ == "__main__":

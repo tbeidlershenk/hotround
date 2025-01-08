@@ -87,7 +87,7 @@ export default function RatingStatsCard({ layout, score }) {
                 ]}
                 yAxis={[
                     {
-                        label: "Count",
+                        label: "# Rounds",
                         style: {
                             fontSize: "12px",
                             fill: "#6b7280",

@@ -1,22 +1,28 @@
-### CaddieBot
+#### HotRound
 
-CaddieBot is a Discord bot serving as a PDGA round rating calculator, aggregating tournament results for any disc golf course and layout.
+HotRound aggregates PDGA sanctioned tournament data to calculate accurate disc golf round ratings for casual, non-sanctioned rounds.
 
-The bot uses tournaments from `discgolfscene.com`, with score & rating data from cooresponding `pdgalive.com` pages.
+Check it out at **[hotround.ddns.net](https://hotround.ddns.net)** !
+Invite the bot to your Discord server **[here](https://discord.com/oauth2/authorize?client_id=1300645264591294475)**
+Kaggle dataset of all my data is **[here](https://www.kaggle.com/datasets/tobiasbeidlershenk/pdga-sanctioned-disc-golf-tournament-data)**
 
-Web interface coming soon!
+#### Example Usage
 
-### Example Usage
+![Website example](./assets/website_1.png)
+![Discord bot example](./assets/discordbot_1.png)
 
-**/get_ratings**
-**course_name:** Persimmon Ridge DGC
-**layout_name:** Gold
-**score:** -5
+#### Built using
 
-![alt text](image.png)
+The frontend site is built using the Flask web framework to serve a ReactJS application, and NGINX as a reverse proxy.
 
-### Resources
+The discord bot is built using the Disnake python library.
 
-Contact me at `tbeidlershenk@gmail.com` with suggestions or to help contribute!
+The dataset used by the project was scraped using Selenium and stored in a SQL database.
 
-[Invite the bot here](https://discord.com/oauth2/authorize?client_id=1300645264591294475&permissions=8&integration_type=0&scope=bot)
+Docker is used to deploy the two applications and Github Actions for automatically building images.
+
+[![My Skills](https://skillicons.dev/icons?i=python,flask,react,nginx,docker,selenium,sqlite,githubactions)](https://skillicons.dev)
+
+#### Credits
+
+The data used in this project was sourced through web scraping from [PDGALive](https://pdga.com/live) and is not being used for commercial purposes.

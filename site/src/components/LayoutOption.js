@@ -16,6 +16,7 @@ export default function LayoutOption({ layout }) {
                 <Typography fontWeight={"bold"}>{layout.num_holes}</Typography>
                 {" holes"}
             </Typography>
+            <Typography>Over {layout.num_rounds} rounds</Typography>
         </Card>
     );
 }

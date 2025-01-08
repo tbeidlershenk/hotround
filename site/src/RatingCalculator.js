@@ -95,7 +95,7 @@ export default function RatingCalculator({ courseOptions }) {
         } else if (status === status_error_no_matches) {
             return (
                 <Typography variant="body1" align="center">
-                    No PDGA sanctioned tournaments found for this course.
+                    Not enough PDGA sanctioned rounds found for this course, cannot calculate ratings.
                 </Typography>
             );
         } else {

@@ -33,6 +33,7 @@ export default function Header() {
                 }}
             >
                 <Typography component="h1" sx={{ fontWeight: "xl" }}>
+                    {" "}
                     HotRound
                 </Typography>
             </Box>

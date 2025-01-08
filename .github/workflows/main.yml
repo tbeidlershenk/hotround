@@ -32,7 +32,7 @@ jobs:
 
             - name: Build and push Docker images with Docker Compose
               run: |
-                  docker build -t tbeidlershenk/flaskserver:latest -f Dockerfile.flaskserver .
+                  docker build --platform=linux/arm64/v8 -t tbeidlershenk/flaskserver:latest -f Dockerfile.flaskserver .
                   docker push tbeidlershenk/flaskserver:latest
-                  docker build -t tbeidlershenk/discordbot:latest -f Dockerfile.discordbot .
+                  docker build --platform=linux/arm64/v8 -t tbeidlershenk/discordbot:latest -f Dockerfile.discordbot .
                   docker push tbeidlershenk/discordbot:latest
