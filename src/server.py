@@ -37,6 +37,8 @@ def rating(course_name: str):
     # TODO not sure if this is the best way to filter out weird data
     returned_layouts = [x for x in aggregated_layouts if x.num_rounds >= 10]
     num_results = len(returned_layouts)
+    logger.info(f"Generated {num_results} layouts for {course_name}")
+    
     if num_results == 0:
         return jsonify({
             "status": status_error_no_matches,
