@@ -6,7 +6,7 @@ import sys
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-from util.configuration import build_kaggle_config, load_config_into_env, verify_config
+from util.configuration import load_config_into_env, verify_config
 from util.database import Database
 from waitress import serve
 from logger import logger
