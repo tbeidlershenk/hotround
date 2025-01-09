@@ -14,3 +14,4 @@ selenium==4.27.1
 SQLAlchemy==2.0.35
 waitress==3.0.2
 logger==1.4.0
+kaggle==1.6.17

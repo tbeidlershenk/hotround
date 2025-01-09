@@ -10,7 +10,7 @@ import time
 
 def scrape_events(config: dict, after_date: datetime = None):
     database = Database(connection=config['db_connection'])
-    scraper = Scraper(chromedriver_path=config['chromedriver_path'])
+    scraper = Scraper()
 
     try:
         logger.info("Scraping events...")

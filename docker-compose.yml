@@ -1,9 +1,9 @@
 services:
-    flaskserver:
-        image: tbeidlershenk/flaskserver:latest
+    web:
+        image: tbeidlershenk/web:latest
         build:
             context: .
-            dockerfile: Dockerfile.flaskserver
+            dockerfile: Dockerfile.web
         ports:
             - "5001:5001"
         volumes:
@@ -11,11 +11,11 @@ services:
             - ./config:/app/config
         command: ["python3", "src/server.py", "config/prod.json"]
 
-    discordbot:
-        image: tbeidlershenk/discordbot:latest
+    bot:
+        image: tbeidlershenk/bot:latest
         build:
             context: .
-            dockerfile: Dockerfile.discordbot
+            dockerfile: Dockerfile.bot
         volumes:
             - ./data:/app/data
             - ./config:/app/config

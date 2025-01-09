@@ -1,11 +1,15 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 import sys
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-from util.configuration import load_config_into_env
+from util.configuration import load_config_into_env, verify_config
 from util.database import Database
 from waitress import serve
 from logger import logger
+from kaggle.api.kaggle_api_extended import KaggleApi
 
 app = Flask(__name__, static_folder='../site/build', static_url_path='/')
 CORS(app)
@@ -55,13 +59,32 @@ def rating(course_name: str):
     }), 200
     
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 server.py <config_file>")
-        sys.exit(1)
+    if len(sys.argv) == 2:
+        config_file_path = sys.argv[1]
+        load_config_into_env(config_file_path)
+    verify_config([
+        "db_path", 
+        "db_file_name", 
+        "db_connection", 
+        "kaggle_dataset",
+        "KAGGLE_USERNAME", 
+        "KAGGLE_KEY",
+        "PORT"
+    ])
+    db_path = os.getenv("db_path")
+    db_file_name = os.getenv("db_file_name")
+    kaggle_dataset = os.getenv("kaggle_dataset")
+    port = os.getenv("PORT")
 
-    config_file_path = sys.argv[1]
-    load_config_into_env(config_file_path)
-    if os.getenv("debug") == "True":
-        app.run(host='0.0.0.0', port=5001)
-    else:
-        serve(app, host='0.0.0.0', port=5001)
+    logger.info("Connecting to Kaggle...")
+    api = KaggleApi()
+    api.authenticate()
+    api.dataset_download_files(
+        dataset=kaggle_dataset,
+        path=db_path, 
+        unzip=True)
+    if not os.path.exists(db_path + db_file_name):
+        raise ValueError("Failed to download Kaggle dataset.")
+    logger.info("Downloaded Kaggle dataset.")
+
+    serve(app, host='0.0.0.0', port=port)

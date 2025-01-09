@@ -14,3 +14,11 @@ def load_config_into_env_from_dict(config: dict) -> None:
         if value is None:
             continue
         os.environ[key] = str(value)
+
+def verify_config(vars: list[str]) -> None:
+    for var in vars:
+        if var in os.environ:
+            continue
+        else:
+            raise ValueError(f"Missing environment variable: {var}")
+        
