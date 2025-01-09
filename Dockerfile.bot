@@ -3,4 +3,4 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
 ADD src/ ./src
-CMD ["python3", "src/bot.py", "config/prod.json"]
+CMD ["python3", "src/bot.py"]

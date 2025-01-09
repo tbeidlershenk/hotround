@@ -1,7 +1,6 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-import json
 import sys
 import os
 from flask import Flask, jsonify, send_from_directory
