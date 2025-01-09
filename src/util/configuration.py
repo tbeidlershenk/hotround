@@ -23,7 +23,8 @@ def verify_config(vars: list[str]) -> None:
             raise ValueError(f"Missing environment variable: {var}")
         
 def build_kaggle_config() -> None:
-    kaggle_dir = os.path.expanduser("~/.kaggle")
+    kaggle_config_path = os.getenv("kaggle_config_path")
+    kaggle_dir = os.path.expanduser(kaggle_config_path)
     os.makedirs(kaggle_dir, exist_ok=True)
     kaggle_json_path = os.path.join(kaggle_dir, "kaggle.json")
     with open(kaggle_json_path, "w") as f:

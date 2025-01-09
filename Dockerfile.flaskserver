@@ -12,4 +12,4 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY --from=site /app/site/ ./site
 ADD src/ ./src
 EXPOSE 80
-CMD ["python3", "src/server.py", "config/prod.json"]
+CMD ["python3", "src/server.py"]

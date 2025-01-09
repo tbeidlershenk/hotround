@@ -63,18 +63,27 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         config_file_path = sys.argv[1]
         load_config_into_env(config_file_path)
-    verify_config(["db_location", "db_connection", "kaggle_username", "kaggle_key"])
+    verify_config([
+        "db_path", 
+        "db_file_name", 
+        "db_connection", 
+        "kaggle_dataset",
+        "kaggle_config_path", 
+        "kaggle_username", 
+        "kaggle_key"
+    ])
+    db_path = os.getenv("db_path")
+    db_file_name = os.getenv("db_file_name")
+    kaggle_dataset = os.getenv("kaggle_dataset")
 
     logger.info("Connecting to Kaggle...")
-    build_kaggle_config()
     api = KaggleApi()
     api.authenticate()
-    path = os.getenv("db_location")
     api.dataset_download_files(
-        dataset='tobiasbeidlershenk/pdga-sanctioned-disc-golf-tournament-data', 
-        path=path, 
+        dataset=kaggle_dataset,
+        path=db_path, 
         unzip=True)
-    if not os.path.exists(path + '/pdga_data.db'):
+    if not os.path.exists(db_path + db_file_name):
         raise ValueError("Failed to download Kaggle dataset.")
     logger.info("Downloaded Kaggle dataset.")
 
