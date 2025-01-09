@@ -1,7 +1,3 @@
 build:
     docker:
         web: Dockerfile.flaskserver
-
-release:
-    command:
-        - heroku container:release flaskserver --app $HEROKU_APP_NAME
