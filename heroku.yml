@@ -1,11 +1,7 @@
 build:
     docker:
-        discordbot:
-            dockerfile: Dockerfile.discordbot
-        flaskserver:
-            dockerfile: Dockerfile.flaskserver
+        web: Dockerfile.flaskserver
 
 release:
     command:
-        - heroku container:release discordbot --app $HEROKU_APP_NAME
         - heroku container:release flaskserver --app $HEROKU_APP_NAME
