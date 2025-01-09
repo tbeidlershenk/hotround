@@ -68,13 +68,14 @@ if __name__ == "__main__":
         "db_file_name", 
         "db_connection", 
         "kaggle_dataset",
-        "kaggle_config_path", 
-        "kaggle_username", 
-        "kaggle_key"
+        "KAGGLE_USERNAME", 
+        "KAGGLE_KEY",
+        "PORT"
     ])
     db_path = os.getenv("db_path")
     db_file_name = os.getenv("db_file_name")
     kaggle_dataset = os.getenv("kaggle_dataset")
+    port = os.getenv("PORT")
 
     logger.info("Connecting to Kaggle...")
     api = KaggleApi()
@@ -87,7 +88,4 @@ if __name__ == "__main__":
         raise ValueError("Failed to download Kaggle dataset.")
     logger.info("Downloaded Kaggle dataset.")
 
-    if os.getenv("debug") == "True":
-        app.run(host='0.0.0.0', port=80)
-    else:
-        serve(app, host='0.0.0.0', port=80)
+    serve(app, host='0.0.0.0', port=port)
