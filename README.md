@@ -18,13 +18,7 @@ PDGALive layouts often differ by small amounts from tournament to tournament, wi
 
 ### Built using
 
-The frontend site is built using the Flask web framework to serve a ReactJS application.
-
-The discord bot is built using the Disnake python library.
-
-The dataset used by the project was scraped using Selenium and stored in a SQL database.
-
-The applications are deployed using Docker and Heroku.
+The **frontend** site is built using the **Flask** web framework to serve a **ReactJS** application. The discord bot is built using the **Disnake** python library. The dataset used by the project was scraped using **Selenium** and stored in a **SQL** database.Then finally applications are deployed using **Docker** and **Heroku**.
 
 [![My Skills](https://skillicons.dev/icons?i=python,flask,react,selenium,sqlite,heroku,docker)](https://skillicons.dev)
 
