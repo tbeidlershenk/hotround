@@ -1,3 +1,4 @@
 build:
     docker:
-        web: Dockerfile.flaskserver
+        web: Dockerfile.web
+        bot: Dockerfile.bot
