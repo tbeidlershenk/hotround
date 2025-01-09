@@ -13,7 +13,7 @@ from datetime import datetime
 
 def scrape_ratings(config: dict):
     database = Database(connection=config['db_connection'])
-    scraper = Scraper(chromedriver_path=config['chromedriver_path'])
+    scraper = Scraper()
 
     try:
         logger.info("Scraping ratings...")

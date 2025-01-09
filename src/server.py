@@ -1,11 +1,16 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+import json
 import sys
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-from util.configuration import load_config_into_env
+from util.configuration import build_kaggle_config, load_config_into_env, verify_config
 from util.database import Database
 from waitress import serve
 from logger import logger
+from kaggle.api.kaggle_api_extended import KaggleApi
 
 app = Flask(__name__, static_folder='../site/build', static_url_path='/')
 CORS(app)
@@ -55,12 +60,24 @@ def rating(course_name: str):
     }), 200
     
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 server.py <config_file>")
-        sys.exit(1)
+    if len(sys.argv) == 2:
+        config_file_path = sys.argv[1]
+        load_config_into_env(config_file_path)
+    verify_config(["db_location", "db_connection", "kaggle_username", "kaggle_key"])
 
-    config_file_path = sys.argv[1]
-    load_config_into_env(config_file_path)
+    logger.info("Connecting to Kaggle...")
+    build_kaggle_config()
+    api = KaggleApi()
+    api.authenticate()
+    path = os.getenv("db_location")
+    api.dataset_download_files(
+        dataset='tobiasbeidlershenk/pdga-sanctioned-disc-golf-tournament-data', 
+        path=path, 
+        unzip=True)
+    if not os.path.exists(path + '/pdga_data.db'):
+        raise ValueError("Failed to download Kaggle dataset.")
+    logger.info("Downloaded Kaggle dataset.")
+
     if os.getenv("debug") == "True":
         app.run(host='0.0.0.0', port=80)
     else:
