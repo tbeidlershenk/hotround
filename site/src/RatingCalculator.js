@@ -25,15 +25,15 @@ export default function RatingCalculator({ courseOptions }) {
     const [status, setStatus] = React.useState(status_none);
     const [layoutOptions, setLayoutOptions] = React.useState([]);
 
-    console.log("STATE");
-    console.log("---------------------------");
-    console.log("Course ", course);
-    console.log("Layout ", layout);
-    console.log("Score ", score);
-    console.log("Layout options ", layoutOptions);
-    console.log("Status ", status);
-    console.log("---------------------------");
-    console.log("");
+    // console.log("STATE");
+    // console.log("---------------------------");
+    // console.log("Course ", course);
+    // console.log("Layout ", layout);
+    // console.log("Score ", score);
+    // console.log("Layout options ", layoutOptions);
+    // console.log("Status ", status);
+    // console.log("---------------------------");
+    // console.log("");
 
     const inputRef = React.useRef(null);
     const defaultFilterOptions = createFilterOptions({ limit: 10 });
@@ -52,7 +52,6 @@ export default function RatingCalculator({ courseOptions }) {
         fetch(`/api/rating/${course}`, { method: "GET" })
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
                 setStatus(data.status);
                 setLayoutOptions(data.layouts);
             })
