@@ -109,8 +109,8 @@ export default function RatingCalculator({ courseOptions }) {
 
     return (
         <Grid container spacing={2} sx={{ justifyContent: "center", alignItems: "top", px: 2, mb: 2, flex: 1 }}>
-            <Grid item container width="100vw" spacing={2} justifyContent={"center"} maxHeight={200}>
-                <Grid item xs={9} sm={2.5}>
+            <Grid item container width="100vw" spacing={2} justifyContent={"center"} maxHeight={172}>
+                <Grid item xs={11} sm={2.5}>
                     <Autocomplete
                         label="Course Name"
                         name="courseName"
@@ -131,7 +131,7 @@ export default function RatingCalculator({ courseOptions }) {
                         color="primary"
                     />
                 </Grid>
-                <Grid item xs={9} sm={2.5}>
+                <Grid item xs={11} sm={2.5}>
                     <Autocomplete
                         label="Layout Name"
                         name="layoutName"
@@ -159,7 +159,7 @@ export default function RatingCalculator({ courseOptions }) {
                         autoHightlight
                     />
                 </Grid>
-                <Grid item xs={9} sm={2.5}>
+                <Grid item xs={11} sm={2.5}>
                     <Input
                         label="Score (relative to par)"
                         name="score"
@@ -186,7 +186,7 @@ export default function RatingCalculator({ courseOptions }) {
                 </Grid>
             </Grid>
 
-            <Box width="90vw" maxWidth="700px">
+            <Box width="100vw" padding={4} maxWidth="700px">
                 {body()}
             </Box>
         </Grid>
