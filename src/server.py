@@ -39,7 +39,7 @@ def rating(course_name: str):
     db.close()
 
     # TODO not sure if this is the best way to filter out weird data
-    returned_layouts = [x for x in aggregated_layouts if x.num_rounds >= 10]
+    returned_layouts = [x for x in aggregated_layouts if x.num_rounds >= 5]
     num_results = len(returned_layouts)
     logger.info(f"Generated {num_results} layouts for {course_name}")
     

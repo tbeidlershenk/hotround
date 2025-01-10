@@ -22,8 +22,9 @@ function format_rating(layout, score) {
 }
 
 export default function RatingStatsCard({ layout, score }) {
+    let num_unique_scores = layout.total_score_distribution.length;
     return (
-        <Card variant="outlined" sx={{ flex: 1, padding: 2, height: "400px" }}>
+        <Card variant="outlined" sx={{ flex: 1, padding: 1, height: "400px" }}>
             <Box>
                 <Box
                     sx={{
@@ -75,29 +76,30 @@ export default function RatingStatsCard({ layout, score }) {
                         scaleType: "band",
                         dataKey: "score",
                         label: "Score",
-                        tickSize: 10, // Adjust tick size
+                        tickSize: 0, // Adjust tick size
                         style: {
-                            fontSize: "12px",
+                            fontSize: "9px",
                             fill: "#6b7280", // Subtle gray color for labels
                         },
-                        interval: 0, // Show all labels by default
-                        tickFormatter: (value, index, totalTicks) =>
-                            totalTicks > 10 && index % Math.ceil(totalTicks / 10) !== 0 ? "" : value, // Skip some labels if overcrowded
+                        totalTicks: 3,
+                        tickLabelInterval: (value, index) => index === 0 || value === 0 || index === num_unique_scores - 1,
+                        tickFormatter: (value, index) => (index === 0 || value === 0 || index === num_unique_scores - 1 ? value : ""), // Show only first, last, and par labels
                     },
                 ]}
                 yAxis={[
                     {
-                        label: "# Rounds",
+                        label: "# scorecards",
                         style: {
-                            fontSize: "12px",
+                            fontSize: "9px",
                             fill: "#6b7280",
                         },
-                        tickSize: 10, // Adjust tick size
+                        tickSize: 0, // Adjust tick size
                     },
                 ]}
                 dataset={layout.total_score_distribution.sort((a, b) => b.score - a.score)}
                 series={[
                     {
+                        showMark: false,
                         dataKey: "count",
                         style: {
                             stroke: "#3b82f6", // Use a blue color for the line
@@ -113,6 +115,7 @@ export default function RatingStatsCard({ layout, score }) {
                     strokeWidth: 1,
                 }}
                 tooltip={{ trigger: "none" }} // No tooltip for now
+                sx={{ minWidth: "100%" }}
             />
 
             <Typography sx={{ fontFamily: '"Source Sans 3", sans-serif' }}>

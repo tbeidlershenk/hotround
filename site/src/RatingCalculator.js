@@ -74,7 +74,7 @@ export default function RatingCalculator({ courseOptions }) {
         } else if (status === status_success) {
             if (!layout) {
                 return (
-                    <Typography variant="body1" align="center">
+                    <Typography variant="body1" align="center" flex={1}>
                         Please select a layout.
                     </Typography>
                 );
@@ -94,7 +94,7 @@ export default function RatingCalculator({ courseOptions }) {
             );
         } else if (status === status_error_no_matches) {
             return (
-                <Typography variant="body1" align="center">
+                <Typography variant="body1" align="center" flex={1}>
                     Not enough PDGA sanctioned rounds found for this course, cannot calculate ratings.
                 </Typography>
             );
@@ -109,12 +109,19 @@ export default function RatingCalculator({ courseOptions }) {
 
     return (
         <Grid container spacing={2} sx={{ justifyContent: "center", alignItems: "top", px: 2, mb: 2, flex: 1 }}>
-            <Grid item container width="100vw" height="150px" spacing={2} justifyContent={"center"}>
-                <Grid item xs={5} sm={2.5}>
+            <Grid item container width="100vw" spacing={2} justifyContent={"center"} maxHeight={200}>
+                <Grid item xs={9} sm={2.5}>
                     <Autocomplete
                         label="Course Name"
                         name="courseName"
                         placeholder="Course name"
+                        slotProps={{
+                            listbox: {
+                                sx: {
+                                    minWidth: "200px", // Allow the width to adjust to content
+                                },
+                            },
+                        }}
                         options={courseOptions}
                         onChange={(_, value) => {
                             handleCourseChange(value);
@@ -124,7 +131,7 @@ export default function RatingCalculator({ courseOptions }) {
                         color="primary"
                     />
                 </Grid>
-                <Grid item xs={5} sm={2.5}>
+                <Grid item xs={9} sm={2.5}>
                     <Autocomplete
                         label="Layout Name"
                         name="layoutName"
@@ -132,8 +139,7 @@ export default function RatingCalculator({ courseOptions }) {
                         slotProps={{
                             listbox: {
                                 sx: {
-                                    minWidth: "275px", // Allow the width to adjust to content
-                                    whiteSpace: "nowrap", // Prevent content from wrapping
+                                    minWidth: "300px", // Allow the width to adjust to content
                                 },
                             },
                         }}
@@ -153,7 +159,7 @@ export default function RatingCalculator({ courseOptions }) {
                         autoHightlight
                     />
                 </Grid>
-                <Grid item xs={5} sm={2.5}>
+                <Grid item xs={9} sm={2.5}>
                     <Input
                         label="Score (relative to par)"
                         name="score"
@@ -180,7 +186,9 @@ export default function RatingCalculator({ courseOptions }) {
                 </Grid>
             </Grid>
 
-            <Box width="76vw">{body()}</Box>
+            <Box width="90vw" maxWidth="700px">
+                {body()}
+            </Box>
         </Grid>
     );
 }

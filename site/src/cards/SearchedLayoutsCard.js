@@ -7,7 +7,7 @@ export default function SearchedLayoutsCard({ rows }) {
         <Card variant="outlined" sx={{ flex: 1, padding: 0 }}>
             <Sheet
                 sx={(theme) => ({
-                    "--TableCell-height": "40px",
+                    "--TableCell-height": "35px",
                     "--TableHeader-height": "calc(1 * var(--TableCell-height))",
                     height: "calc(10 * var(--TableCell-height))",
                     overflow: "auto",
