@@ -18,8 +18,8 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       - name: Build and push Docker image for hotroundweb
         run: |
-          docker build -f Dockerfile.web -t registry.heroku.com/hotroundweb .
-          docker push registry.heroku.com/hotroundweb
+          docker build -f Dockerfile.web -t registry.heroku.com/hotroundweb/web .
+          docker push registry.heroku.com/hotroundweb/web
       - name: Release hotroundweb
         run: heroku container:release web -a hotroundweb
         env:
@@ -38,8 +38,8 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       - name: Build and push Docker image for hotroundbot
         run: |
-          docker build -f Dockerfile.bot -t registry.heroku.com/hotroundbot .
-          docker push registry.heroku.com/hotroundbot
+          docker build -f Dockerfile.bot -t registry.heroku.com/hotroundbot/web .
+          docker push registry.heroku.com/hotroundbot/web
       - name: Release hotroundbot
         run: heroku container:release web -a hotroundbot
         env:
