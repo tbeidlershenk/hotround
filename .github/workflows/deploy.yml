@@ -22,6 +22,8 @@ jobs:
           docker push registry.heroku.com/hotroundweb
       - name: Release hotroundweb
         run: heroku container:release web -a hotroundweb
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
   deploy-hotroundbot-dyno:
     runs-on: ubuntu-latest
@@ -40,3 +42,5 @@ jobs:
           docker push registry.heroku.com/hotroundbot
       - name: Release hotroundbot
         run: heroku container:release web -a hotroundbot
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
