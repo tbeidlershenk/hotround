@@ -1,4 +1,0 @@
-build:
-    docker:
-        web: Dockerfile.web
-        bot: Dockerfile.bot
