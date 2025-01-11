@@ -47,6 +47,8 @@ async def ratings(
     Returns:
         None
     """
+    await inter.response.defer()
+
     bot: HotRoundBot = plugin.bot
     all_course_names = [course.readable_course_name for course in bot.database.query_courses()]
     scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
@@ -54,7 +56,7 @@ async def ratings(
     # ERROR: No close course matches
     if course_name not in [course for course, _ in scored_course_names]:
         similar_course_names = [course for course, _ in scored_course_names]
-        await inter.response.send_message(embed=disnake.Embed.from_dict({
+        await inter.followup.send(embed=disnake.Embed.from_dict({
             "title": f"{course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
             "description": f"No matches for course '{course_name}'.",
             "color": 0x1491A0,
@@ -75,7 +77,7 @@ async def ratings(
 
     # ERROR: No sanctioned rounds
     if num_results == 0:
-        await inter.response.send_message(embed=disnake.Embed.from_dict({
+        await inter.followup.send(embed=disnake.Embed.from_dict({
             "title": f"{course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
             "description": f"No PDGA tournaments found for '{course_name}'.",
             "color": 0x1491A0,
@@ -109,6 +111,6 @@ async def ratings(
         for i, layout in enumerate(aggregate_layouts)]
 
     logger.info(f"User {inter.author.name} requested ratings for {course_name} with score {score}")
-    await inter.response.send_message(embed=embeds[0], view=CreatePaginator(embeds, author_id=inter.author.id, timeout=600)) 
+    await inter.followup.send(embed=embeds[0], view=CreatePaginator(embeds, author_id=inter.author.id, timeout=600)) 
 
 setup, teardown = plugin.create_extension_handlers()
