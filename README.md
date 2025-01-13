@@ -4,7 +4,7 @@
 
 **HotRound** aggregates PDGA sanctioned tournament data to calculate accurate disc golf round ratings for casual, non-sanctioned rounds.
 
-**[hotround.site](https://hotround.site)** • **[Discord Bot](https://discord.com/oauth2/authorize?client_id=1300645264591294475)** • **[Kaggle dataset](https://www.kaggle.com/datasets/tobiasbeidlershenk/pdga-sanctioned-disc-golf-tournament-data)**
+**[hotround.site](https://hotround.site)** • **[Discord Bot](https://discord.com/oauth2/authorize?client_id=1300645264591294475)**
 
 ### How it works
 
@@ -18,9 +18,13 @@ PDGALive layouts often differ by small amounts from tournament to tournament, wi
 
 ### Built using
 
-The **frontend** site is built using the **Flask** web framework to serve a **ReactJS** application. The discord bot is built using the **Disnake** python library. The dataset used by the project was scraped using **Selenium** and stored in a **SQL** database.Then finally applications are deployed using **Docker** and **Heroku**.
+The frontend site is built using the `Flask` web framework to serve a `ReactJS` application. The discord bot is built using the `Disnake` python library. The dataset used by the project was scraped using `Selenium` and stored in a `SQLite` database. Applications are then deployed using `Docker` and `Heroku`.
 
 [![My Skills](https://skillicons.dev/icons?i=python,flask,react,selenium,sqlite,heroku,docker)](https://skillicons.dev)
+
+### Contributing
+
+Contact me at tbeidlershenk@gmail.com if you have ideas / feedback or are interested in contributing! I am looking to continue developing this project and potentially working with other devs.
 
 ### Credits
 
