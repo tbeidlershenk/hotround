@@ -1,6 +1,6 @@
-## HotRound
+# HotRound
 
-![Uptime Robot status](https://img.shields.io/uptimerobot/status/m798326084-f2659ca54689c996a957c4f5?up_message=online&down_message=offline&style=flat-square&link=https%3A%2F%2Fstats.uptimerobot.com%2FIvJUZPjdWN)
+![Uptime Robot status](https://img.shields.io/uptimerobot/status/m798326084-f2659ca54689c996a957c4f5?up_message=online&down_message=offline&style=flat-square&link=https://stats.uptimerobot.com/IvJUZPjdWN)
 
 **HotRound** aggregates PDGA sanctioned tournament data to calculate accurate disc golf round ratings for casual, non-sanctioned rounds.
 
