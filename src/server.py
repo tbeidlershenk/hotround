@@ -25,6 +25,11 @@ def home():
     logger.info("Loaded home page")
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/api/status', methods=['GET'])
+def status():
+    logger.info("Uptime status check")
+    return jsonify({"online": True})
+
 @app.route('/api/courses', methods=['GET'])
 def courses():
     db = Database(os.getenv("db_connection"))
