@@ -4,7 +4,7 @@ import disnake_plugins
 from disnake.ext import commands
 from fuzzywuzzy import fuzz, process
 from logger import logger
-from Paginator import CreatePaginator
+from ui.options import CreateOptions
 from bot import HotRoundBot
 from models.layout import AggregateLayout
 import disnake
@@ -13,20 +13,6 @@ from disnake.ext import commands
 plugin = disnake_plugins.Plugin()
 NEWLINE = '\n'
 COMMASPACE = ', '
-
-def layout_to_markdown_table(layout: AggregateLayout, row_size = 6) -> str:
-    rows = []
-    for i in range(layout.num_holes // row_size):
-        start = i * row_size
-        end = (i + 1) * row_size
-        holes = [f"H{x}".ljust(5) for x in range(start + 1, end + 1)]
-        pars = [str(x).ljust(5) for x in layout.pars[start:end]]
-        distances = [str(x).ljust(5) for x in layout.distances[start:end]]
-        row = ""+"".join(holes) + "\n"
-        row += ""+"".join(pars) + "\n"
-        row += "" +"".join(distances) + "\n"
-        rows.append(row)
-    return ("----------------------------" + "\n").join(rows)
 
 def layout_to_str(layout: AggregateLayout, num_results = 3) -> str:
     return "\n".join([f"H{x+1} • Par {layout.pars[x]} • **{layout.distances[x]}**'" for x in range(min(layout.num_holes, num_results))])
@@ -38,56 +24,31 @@ async def ratings(
     # TODO find a better solution for UX purposes
     layout_keywords: str = commands.Param(max_length=200, default="", description="Comma separated keywords (ex. 'Gold, Long, MPO' )"), 
     score: int = commands.Param(description="Your score, relative to par")):
-    """
-    Fetches ratings for a specified course and layout.
-    Args:
-        inter (disnake.CommandInteraction): The interaction object for the command.
-        course_name (str, required): The name of the course to get ratings for. Defaults to a maximum length of 100 characters.
-        score (int, required): the sscore to use to calculate ratings
-    Returns:
-        None
-    """
-    await inter.response.defer()
 
+    await inter.response.defer()
     bot: HotRoundBot = plugin.bot
+
     all_course_names = [course.readable_course_name for course in bot.database.query_courses()]
     scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
-    
-    # ERROR: No close course matches
-    if course_name not in [course for course, _ in scored_course_names]:
-        similar_course_names = [course for course, _ in scored_course_names]
-        await inter.followup.send(embed=disnake.Embed.from_dict({
-            "title": f"{course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"No matches for course '{course_name}'.",
-            "color": 0x1491A0,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "author": {
-                "name": "HotRound",
-                "url": "https://hotround.ddns.net",
-                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
-            },
-            "fields": [
-                {"name": "Did you mean:", "value": f"{NEWLINE.join(similar_course_names[:5])}", "inline": "false"},
-            ]
-        }), ephemeral=False)
-        return
-    
-    aggregate_layouts = bot.database.query_aggregate_layouts(course_name)
+    similar_course_names = [course for course, _ in scored_course_names]
+    chosen_course_name = similar_course_names[0] if similar_course_names else course_name
+    aggregate_layouts = bot.database.query_aggregate_layouts(chosen_course_name)
     num_results = len(aggregate_layouts)
 
     # ERROR: No sanctioned rounds
     if num_results == 0:
-        await inter.followup.send(embed=disnake.Embed.from_dict({
-            "title": f"{course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"No PDGA tournaments found for '{course_name}'.",
-            "color": 0x1491A0,
+        embeds=[disnake.Embed.from_dict({
+            "title": f"{chosen_course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
+            "description": f"No PDGA tournaments found for '{chosen_course_name}'.\n\n*Wrong course? Click ❓*",
+            "color": 0xFF1B29,
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
                 "name": "HotRound",
-                "url": "https://hotround.ddns.net",
+                "url": "https://hotround.site",
                 "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
-            }
-        }), ephemeral=False)
+            },
+        })]
+        await inter.followup.send(embed=embeds[0], view=CreateOptions(embeds, similar_course_names, disable_pagination=True, author_id=inter.author.id, timeout=600))
         return
     
     layout_keywords = layout_keywords.replace(' ', '').split(',')
@@ -99,18 +60,18 @@ async def ratings(
             "timestamp": datetime.datetime.now().isoformat(),
             "author": {
                 "name": "HotRound",
-                "url": "https://hotround.ddns.net",
+                "url": "https://hotround.site",
                 "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
             },
             "description": f"""
-                **__{course_name}__**\n*{layout.descriptive_name}*\n**{layout.total_distance}'**, par **{layout.total_par}**\n{layout_to_str(layout, num_results=3)}...\n\nCalculated from **{layout.num_layouts}** rounds\nEvents: **{COMMASPACE.join(layout.layout_links()[:5])}**\n\n*Wrong layout? Click below :)*""",
+                **__{chosen_course_name}__**\n*{layout.descriptive_name}*\n**{layout.total_distance}'**, par **{layout.total_par}**\n{layout_to_str(layout, num_results=3)}...\n\nCalculated from **{layout.num_layouts}** rounds\nEvents: **{COMMASPACE.join(layout.layout_links()[:5])}**\n\n*Wrong layout? Click ➡️\nWrong course? Click ❓*""",
             "footer": {
                 "text": f"Result {i+1} of {num_results}"
             }
         }) 
         for i, layout in enumerate(aggregate_layouts)]
 
-    logger.info(f"User {inter.author.name} requested ratings for {course_name} with score {score}")
-    await inter.followup.send(embed=embeds[0], view=CreatePaginator(embeds, author_id=inter.author.id, timeout=600)) 
+    logger.info(f"User {inter.author.name} requested ratings for {chosen_course_name} with score {score}")
+    await inter.followup.send(embed=embeds[0], view=CreateOptions(embeds, similar_course_names, author_id=inter.author.id, timeout=600)) 
 
 setup, teardown = plugin.create_extension_handlers()
