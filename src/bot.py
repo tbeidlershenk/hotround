@@ -55,10 +55,10 @@ if __name__ == "__main__":
     logger.info("Connecting to Kaggle...")
     api = KaggleApi()
     api.authenticate()
-    # api.dataset_download_files(
-    #     dataset=kaggle_dataset,
-    #     path=db_path, 
-    #     unzip=True)
+    api.dataset_download_files(
+        dataset=kaggle_dataset,
+        path=db_path, 
+        unzip=True)
     if not os.path.exists(db_path + db_file_name):
         raise ValueError("Failed to download Kaggle dataset.")
     logger.info("Downloaded Kaggle dataset.")
