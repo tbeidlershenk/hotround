@@ -4,7 +4,7 @@
 
 **HotRound** aggregates PDGA sanctioned tournament data to calculate accurate disc golf round ratings for casual, non-sanctioned rounds.
 
-**[hotround.site](https://hotround.site)** • **[Discord Bot](https://discord.com/oauth2/authorize?client_id=1300645264591294475)**
+**[hotround.tbeidlershenk.dev](https://hotround.tbeidlershenk.dev)** • **[Discord Bot](https://discord.com/oauth2/authorize?client_id=1300645264591294475)**
 
 ### How it works
 
