@@ -8,6 +8,7 @@ from models.round import Round
 from datetime import datetime
 from models.score import Score
 
+
 class Database:
     def __init__(self, connection: str) -> None:
         engine = create_engine(connection)
@@ -27,7 +28,9 @@ class Database:
 
         self.session.commit()
 
-    def merge_data(self, course: Course, events: list[Event] = [], rounds: list[Round] = []) -> None:
+    def merge_data(
+        self, course: Course, events: list[Event] = [], rounds: list[Round] = []
+    ) -> None:
         self.session.merge(course)
 
         for event in events:
@@ -36,50 +39,61 @@ class Database:
         for round in rounds:
             self.session.merge(round)
 
-        self.session.commit()    
-        
+        self.session.commit()
+
     def event_exists(self, event_id: int) -> bool:
-        return self.session.query(Event).filter_by(event_id=event_id).first() is not None
-        
+        return (
+            self.session.query(Event).filter_by(event_id=event_id).first() is not None
+        )
+
     def event_contains_round_data(self, event_id: int) -> bool:
-        return self.session.query(Round).filter_by(event_id=event_id).first() is not None
-    
+        return (
+            self.session.query(Round).filter_by(event_id=event_id).first() is not None
+        )
+
     def delete_event(self, event_id: int) -> None:
         self.session.query(Event).filter_by(event_id=event_id).delete()
         self.session.commit()
-    
+
     def query_courses(self) -> list[Course]:
         data = self.session.query(Course).all()
         return data
-    
+
     def query_courses_with_no_events(self) -> list[Course]:
         subquery = self.session.query(Event.course_name).distinct()
         data = (
-            self.session.query(Course)
-            .filter(Course.course_name.notin_(subquery))
-            .all()
+            self.session.query(Course).filter(Course.course_name.notin_(subquery)).all()
         )
         return data
-    
+
     def query_events(self) -> list[Event]:
         data = self.session.query(Event).all()
         return data
-    
+
+    def query_most_recent_event_date(self, course_name: str) -> datetime:
+        most_recent_event = (
+            self.session.query(Event)
+            .filter_by(course_name=course_name)
+            .order_by(Event.date.desc())
+            .first()
+        )
+        return most_recent_event.date if most_recent_event else datetime.min
+
     def query_events_with_no_rounds(self) -> list[Event]:
         subquery = self.session.query(Round.event_id).distinct()
-        data = (
-            self.session.query(Event)
-            .filter(Event.event_id.notin_(subquery))
-            .all()
-        )
+        data = self.session.query(Event).filter(Event.event_id.notin_(subquery)).all()
         return data
-    
+
     def query_rounds_for_course(self, readable_course_name: str) -> list[Round]:
-        course = self.session.query(Course).filter(Course.readable_course_name.ilike(readable_course_name)).first()
-        
+        course = (
+            self.session.query(Course)
+            .filter(Course.readable_course_name.ilike(readable_course_name))
+            .first()
+        )
+
         if not course:
             return []
-        
+
         course_name = course.course_name
         data = (
             self.session.query(Round)
@@ -88,13 +102,19 @@ class Database:
             .all()
         )
         return data
-    
-    def query_aggregate_layouts(self, readable_course_name: str) -> list[AggregateLayout]:
-        course = self.session.query(Course).filter(Course.readable_course_name.ilike(readable_course_name)).first()
-        
+
+    def query_aggregate_layouts(
+        self, readable_course_name: str
+    ) -> list[AggregateLayout]:
+        course = (
+            self.session.query(Course)
+            .filter(Course.readable_course_name.ilike(readable_course_name))
+            .first()
+        )
+
         if not course:
             return []
-        
+
         course_name = course.course_name
         layouts_rounds = (
             self.session.query(Round)
@@ -105,6 +125,6 @@ class Database:
         )
         data = aggregate_layouts(layouts_rounds)
         return data
-    
+
     def close(self) -> None:
         self.session.close()

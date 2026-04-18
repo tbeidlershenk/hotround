@@ -2,6 +2,10 @@ import requests
 import logging
 import time
 
+
+proxies = []
+
+
 def get_request_avoid_rate_limit(url: str, sleep_time: int = 60) -> requests.Response:
     """
     Makes a GET request to the specified URL and handles rate limiting by retrying after a specified sleep time.
@@ -15,9 +19,6 @@ def get_request_avoid_rate_limit(url: str, sleep_time: int = 60) -> requests.Res
     """
 
     response = requests.get(url)
-    while response.status_code == 429:
-        logging.info(f'Rate limited. Waiting {sleep_time}s...')
-        time.sleep(sleep_time)
-        response = requests.get(url)
     response.raise_for_status()
+    time.sleep(1)
     return response
