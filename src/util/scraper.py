@@ -44,13 +44,13 @@ def try_parse_hole_data(
 class Scraper:
     def __init__(self) -> None:
         options = webdriver.ChromeOptions()
-        options.add_argument("--headless")
+        options.add_argument("--headless=new")   # IMPORTANT (old headless is deprecated)
+        options.add_argument("--no-sandbox")     # REQUIRED on many servers
+        options.add_argument("--disable-dev-shm-usage")  # prevents crashes in /dev/shm
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
         options.binary_location = os.getenv("chrome_binary_path")
-        self.driver = webdriver.Chrome(
-            service=Service(os.getenv("chromedriver_path")), options=options
-        )
+        self.driver = webdriver.Chrome(options=options)
 
     def cleanup(self) -> None:
         self.driver.quit()
