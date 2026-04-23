@@ -1,3 +1,4 @@
+import os
 from re import S
 import warnings
 from models.layout import Layout
@@ -25,10 +26,6 @@ import traceback
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
-import chromedriver_autoinstaller
-
-chromedriver_autoinstaller.install()
-
 
 def try_parse_hole_data(
     hole_elements: list[HtmlElement], num_holes: int, default: int, drop_last=True
@@ -45,13 +42,14 @@ def try_parse_hole_data(
 
 
 class Scraper:
-    def __init__(self, chromedriver_path: str = None) -> None:
+    def __init__(self) -> None:
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
+        options.binary_location = os.getenv("chrome_binary_path")
         self.driver = webdriver.Chrome(
-            service=Service(chromedriver_path), options=options
+            service=Service(os.getenv("chromedriver_path")), options=options
         )
 
     def cleanup(self) -> None:
