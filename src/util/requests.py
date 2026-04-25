@@ -20,5 +20,5 @@ def get_request_avoid_rate_limit(url: str, sleep_time: int = 60) -> requests.Res
 
     response = requests.get(url)
     response.raise_for_status()
-    time.sleep(1)
+    time.sleep(2)
     return response

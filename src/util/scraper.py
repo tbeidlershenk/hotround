@@ -65,13 +65,14 @@ class Scraper:
     ) -> None:
         for _ in range(5):
             try:
+                time.sleep(2)
                 self.driver.get(url)
                 WebDriverWait(self.driver, timeout).until(
                     EC.presence_of_element_located((By.XPATH, xpath))
                 )
                 return
             except Exception as e:
-                time.sleep(1)
+                pass
 
         raise Exception(f"Failed to load page in 5 attempts")
 
