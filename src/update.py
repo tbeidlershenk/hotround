@@ -25,6 +25,7 @@ if not os.path.exists(db_path + db_file_name):
     logger.info(
         f"Database file not found at {db_path + db_file_name}. Pulling from Kaggle..."
     )
+    exit(1)
     pull_from_kaggle()
 
 connection = os.getenv("db_connection")
@@ -48,4 +49,4 @@ for i, course in enumerate(courses):
     logger.info(f"Done.")
     logger.info("")
 
-push_to_kaggle()
+#push_to_kaggle()
