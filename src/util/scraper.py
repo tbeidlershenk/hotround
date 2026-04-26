@@ -44,8 +44,8 @@ def try_parse_hole_data(
 class Scraper:
     def __init__(self) -> None:
         options = webdriver.ChromeOptions()
-        options.add_argument("--headless=new")   # IMPORTANT (old headless is deprecated)
-        options.add_argument("--no-sandbox")     # REQUIRED on many servers
+        options.add_argument("--headless=new")  # IMPORTANT (old headless is deprecated)
+        options.add_argument("--no-sandbox")  # REQUIRED on many servers
         options.add_argument("--disable-dev-shm-usage")  # prevents crashes in /dev/shm
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
@@ -241,6 +241,10 @@ class Scraper:
         """
 
         pdgalive_url = Consts.pdgalive_score_page_url.format(event_id=event_id)
+        divisions = []
+        rounds = []
+        rating_data = []
+
         try:
             self.get_driver_page_and_wait_for_xpath(
                 pdgalive_url, Consts.pdgalive_division_picker_xpath
@@ -253,7 +257,6 @@ class Scraper:
             rounds: list[str] = [
                 x.text for x in tree.xpath(Consts.pdgalive_round_xpath)
             ]
-            rating_data = []
         except Exception as e:
             logger.info(f"Error - {pdgalive_url}: {str(e).splitlines()[0]}")
 
