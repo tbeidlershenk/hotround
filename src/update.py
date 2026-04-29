@@ -40,7 +40,9 @@ for i, course in enumerate(courses):
     )
     events = scraper.get_all_sanctioned_events(course.course_name, year=2025)
     for event in events:
-        if database.event_exists(event.event_id):
+        event_exists = database.event_exists(event.event_id)
+        event_has_rounds = database.event_contains_round_data(event.event_id)
+        if event_exists and event_has_rounds:
             logger.info(f"Skip  - {event.event_id}: event already exists in database")
             continue
         rounds = scraper.get_round_ratings_for_tournament(event.event_id)
@@ -49,4 +51,4 @@ for i, course in enumerate(courses):
     logger.info(f"Done.")
     logger.info("")
 
-#push_to_kaggle()
+# push_to_kaggle()
