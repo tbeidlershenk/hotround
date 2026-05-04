@@ -1,0 +1,37 @@
+name: build
+
+on:
+  push:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      -
+        name: Build HotRound Web
+        uses: docker/build-push-action@v7
+        with:
+          file: Dockerfile.web
+          tags: tbeidlershenk/hotround:web
+          platforms: linux/amd64
+          push: true
+      -
+        name: Build HotRound Bot
+        uses: docker/build-push-action@v7
+        with:
+          file: Dockerfile.bot
+          tags: tbeidlershenk/hotround:bot
+          platforms: linux/amd64
+          push: true
