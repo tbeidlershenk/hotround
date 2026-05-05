@@ -38,7 +38,7 @@ for i, course in enumerate(courses):
     logger.info(
         f"{i+1}/{len(courses)}: Updating events for {course.readable_course_name}..."
     )
-    events = scraper.get_all_sanctioned_events(course.course_name, year=2025)
+    events = scraper.get_all_sanctioned_events(course.course_name)
     for event in events:
         event_exists = database.event_exists(event.event_id)
         event_has_rounds = database.event_contains_round_data(event.event_id)
