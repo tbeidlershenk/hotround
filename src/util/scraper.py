@@ -262,14 +262,16 @@ class Scraper:
 
         for division, round in product(divisions, rounds):
             try:
-                round_number = int(round[3])
-                pdga_live_url = (
+                round_number = -1
+                if len(round) < 4:
+                    round_number = int(round[3])
+                pdgalive_url = (
                     Consts.pdgalive_score_page_specific_division_and_round_url.format(
                         event_id=event_id, division=division, round_number=round_number
                     )
                 )
                 self.get_driver_page_and_wait_for_xpath(
-                    pdga_live_url, Consts.pdgalive_player_row_xpath
+                    pdgalive_url, Consts.pdgalive_player_row_xpath
                 )
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
                 tree: HtmlElement = html.fromstring(str(soup))
@@ -369,8 +371,8 @@ class Scraper:
 
                 rating_data.append(round)
 
-                logger.info(f"Fetch - {pdga_live_url}")
+                logger.info(f"Fetch - {pdgalive_url}")
             except Exception as e:
-                logger.info(f"Error - {pdga_live_url} - {str(e).splitlines()[0]}")
+                logger.info(f"Error - {pdgalive_url} - {str(e).splitlines()[0]}")
 
         return rating_data
