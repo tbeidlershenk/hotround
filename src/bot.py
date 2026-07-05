@@ -9,7 +9,6 @@ import asyncio
 from util.configuration import load_config_into_env, verify_config
 from util.database import Database
 from logger import logger
-from kaggle.api.kaggle_api_extended import KaggleApi
 
 
 class HotRoundBot(commands.InteractionBot):

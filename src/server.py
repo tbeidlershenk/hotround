@@ -39,13 +39,14 @@ def courses():
     db = Database(os.getenv("db_connection"))
     courses = db.query_courses()
     db.close()
-    return jsonify([course.readable_course_name for course in courses])
+    return jsonify([course.get_name() for course in courses])
 
 
 @app.route("/api/rating/<course_name>", methods=["GET"])
 def rating(course_name: str):
     db = Database(os.getenv("db_connection"))
-    aggregated_layouts = db.query_aggregate_layouts(course_name)
+    course = db.query_course_with_name(course_name)
+    aggregated_layouts = db.query_aggregate_layouts(course.course_id)
     db.close()
 
     # TODO not sure if this is the best way to filter out weird data
@@ -88,9 +89,6 @@ if __name__ == "__main__":
             "db_path",
             "db_file_name",
             "db_connection",
-            "kaggle_dataset",
-            "KAGGLE_USERNAME",
-            "KAGGLE_KEY",
             "PORT",
         ]
     )

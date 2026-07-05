@@ -16,109 +16,88 @@ class Database:
         session = sessionmaker(bind=engine)
         self.session: Session = session()
 
-    def merge_rounds(self, rounds: list[Round]) -> None:
-        for round in rounds:
-            self.session.merge(round)
-
-        self.session.commit()
-
-    def merge_events(self, events: list[Event]) -> None:
-        for event in events:
-            self.session.merge(event)
-
-        self.session.commit()
-
-    def merge_data(
-        self, course: Course, events: list[Event] = [], rounds: list[Round] = []
-    ) -> None:
+    def merge_data(self, course: Course, events: list[Event] = [], rounds: list[Round] = []) -> None:
         self.session.merge(course)
-
         for event in events:
             self.session.merge(event)
-
         for round in rounds:
             self.session.merge(round)
-
         self.session.commit()
 
     def event_exists(self, event_id: int) -> bool:
         return (
-            self.session.query(Event).filter_by(event_id=event_id).first() is not None
+            self.session.query(Event)
+            .filter_by(event_id=event_id)
+            .first() is not None
         )
 
     def event_contains_round_data(self, event_id: int) -> bool:
         return (
-            self.session.query(Round).filter_by(event_id=event_id).first() is not None
+            self.session.query(Round)
+            .filter_by(event_id=event_id)
+            .first() is not None
         )
 
-    def delete_event(self, event_id: int) -> None:
-        self.session.query(Event).filter_by(event_id=event_id).delete()
-        self.session.commit()
-
     def query_courses(self) -> list[Course]:
-        data = self.session.query(Course).all()
-        return data
+        return self.session.query(Course).all()
+    
+    def query_course_with_name(self, course_name: str) -> Course:
+        return (
+            self.session.query()
+            .filter(Course.course_name == course_name)
+            .first()
+        )
 
     def query_courses_with_no_events(self) -> list[Course]:
         subquery = self.session.query(Event.course_name).distinct()
-        data = (
-            self.session.query(Course).filter(Course.course_name.notin_(subquery)).all()
+        return (
+            self.session.query(Course)
+            .filter(Course.course_name.notin_(subquery))
+            .all()
         )
-        return data
 
     def query_events(self) -> list[Event]:
-        data = self.session.query(Event).all()
-        return data
+        return self.session.query(Event).all()
+    
+    def query_events_for_course(self, course_id: int) -> list[Event]:
+        return (
+            self.session.query(Event)
+            .filter(Event.course_id == course_id)
+            .all()
+        )
 
-    def query_most_recent_event_date(self, course_name: str) -> datetime:
+    def query_most_recent_event_date(self, course_id: str) -> datetime:
         most_recent_event = (
             self.session.query(Event)
-            .filter_by(course_name=course_name)
+            .filter(Event.course_id == course_id)
             .order_by(Event.date.desc())
             .first()
         )
         return most_recent_event.date if most_recent_event else datetime.min
 
     def query_events_with_no_rounds(self) -> list[Event]:
-        subquery = self.session.query(Round.event_id).distinct()
-        data = self.session.query(Event).filter(Event.event_id.notin_(subquery)).all()
-        return data
-
-    def query_rounds_for_course(self, readable_course_name: str) -> list[Round]:
-        course = (
-            self.session.query(Course)
-            .filter(Course.readable_course_name.ilike(readable_course_name))
-            .first()
+        subquery = (
+            self.session.query(Round.event_id)
+            .distinct()
+        )
+        return (
+            self.session.query(Event)
+            .filter(Event.event_id.notin_(subquery))
+            .all()
         )
 
-        if not course:
-            return []
-
-        course_name = course.course_name
-        data = (
+    def query_rounds_for_course(self, course_id: int) -> list[Round]:
+        return (
             self.session.query(Round)
-            .filter(Event.course_name == course_name)
+            .filter(Event.course_id == course_id)
             .join(Event, Round.event_id == Event.event_id)
             .all()
         )
-        return data
 
-    def query_aggregate_layouts(
-        self, readable_course_name: str
-    ) -> list[AggregateLayout]:
-        course = (
-            self.session.query(Course)
-            .filter(Course.readable_course_name.ilike(readable_course_name))
-            .first()
-        )
-
-        if not course:
-            return []
-
-        course_name = course.course_name
+    def query_aggregate_layouts(self, course_id: int) -> list[AggregateLayout]:
         layouts_rounds = (
             self.session.query(Round)
-            .filter(Event.course_name == course_name)
+            .filter(Event.course_id == course_id)
             .join(Event, Round.event_id == Event.event_id)
             .options(joinedload(Round.scores), joinedload(Round.layout))
             .all()

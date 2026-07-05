@@ -9,6 +9,7 @@ from bot import HotRoundBot
 from models.layout import AggregateLayout
 import disnake
 from disnake.ext import commands
+from util.matching import course_name_contains_tokens
 
 plugin = disnake_plugins.Plugin()
 NEWLINE = '\n'
@@ -28,11 +29,27 @@ async def ratings(
     await inter.response.defer()
     bot: HotRoundBot = plugin.bot
 
-    all_course_names = [course.readable_course_name for course in bot.database.query_courses()]
-    scored_course_names: tuple[str, int] = process.extractBests(course_name, all_course_names, scorer=fuzz.token_set_ratio, score_cutoff=0, limit=5)
-    similar_course_names = [course for course, _ in scored_course_names]
-    chosen_course_name = similar_course_names[0] if similar_course_names else course_name
-    aggregate_layouts = bot.database.query_aggregate_layouts(chosen_course_name)
+    courses = bot.database.query_courses()
+    search_tokens = course_name.split(' ')
+    matching_courses = [x for x in courses if course_name_contains_tokens(x.course_name, search_tokens)]
+    # ERROR: No sanctioned rounds
+    if len(matching_courses) == 0:
+        embeds=[disnake.Embed.from_dict({
+            "title": f"{course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
+            "description": f"No PDGA tournaments found for '{course_name}'.\n\n*Wrong course? Click ❓*",
+            "color": 0xFF1B29,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "author": {
+                "name": "HotRound",
+                "url": "https://hotround.site",
+                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
+            },
+        })]
+        await inter.followup.send(embed=embeds[0], view=CreateOptions(embeds, similar_course_names, disable_pagination=True, author_id=inter.author.id, timeout=600))
+        return
+
+    chosen_course_name = matching_courses[0]
+    aggregate_layouts = bot.database.query_aggregate_layouts(matching_courses[0])
     num_results = len(aggregate_layouts)
 
     # ERROR: No sanctioned rounds

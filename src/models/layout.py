@@ -7,7 +7,7 @@ from models.round import Round
 from scipy.cluster.hierarchy import linkage, fcluster
 
 from models.score import Score
-from util.strings import to_pdgalive_link
+from util.helpers import to_pdgalive_link
 
 
 class Layout(Base):
