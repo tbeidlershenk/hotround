@@ -11,84 +11,38 @@ import disnake
 from disnake.ext import commands
 from util.matching import course_name_contains_tokens
 
-plugin = disnake_plugins.Plugin()
-NEWLINE = '\n'
-COMMASPACE = ', '
+from discord.course_dropdown import CourseDropdownView
+from discord.embeds import Embeds
 
-def layout_to_str(layout: AggregateLayout, num_results = 3) -> str:
-    return "\n".join([f"H{x+1} • Par {layout.pars[x]} • **{layout.distances[x]}**'" for x in range(min(layout.num_holes, num_results))])
+plugin = disnake_plugins.Plugin()
 
 @plugin.slash_command(description="Calculates ratings for a specified course and layout")
 async def ratings(
     inter: disnake.CommandInteraction, 
-    course_name: str = commands.Param(max_length=100, description="Name of course you played"), 
-    # TODO find a better solution for UX purposes
-    layout_keywords: str = commands.Param(max_length=200, default="", description="Comma separated keywords (ex. 'Gold, Long, MPO' )"), 
+    course: str = commands.Param(max_length=100, description="Name of course you played"), 
     score: int = commands.Param(description="Your score, relative to par")):
 
+    # defer response to give IO time
     await inter.response.defer()
     bot: HotRoundBot = plugin.bot
 
+    # query and match courses to search
     courses = bot.database.query_courses()
-    search_tokens = course_name.split(' ')
-    matching_courses = [x for x in courses if course_name_contains_tokens(x.course_name, search_tokens)]
-    # ERROR: No sanctioned rounds
+    search_tokens = course.split(' ')
+    matching_courses = [x for x in courses if course_name_contains_tokens(x, search_tokens)]
+
+    # abort, no matches found
     if len(matching_courses) == 0:
-        embeds=[disnake.Embed.from_dict({
-            "title": f"{course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"No PDGA tournaments found for '{course_name}'.\n\n*Wrong course? Click ❓*",
-            "color": 0xFF1B29,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "author": {
-                "name": "HotRound",
-                "url": "https://hotround.site",
-                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
-            },
-        })]
-        await inter.followup.send(embed=embeds[0], view=CreateOptions(embeds, similar_course_names, disable_pagination=True, author_id=inter.author.id, timeout=600))
-        return
+        await inter.followup.send(embed=Embeds.no_matches(course))
 
-    chosen_course_name = matching_courses[0]
-    aggregate_layouts = bot.database.query_aggregate_layouts(matching_courses[0])
-    num_results = len(aggregate_layouts)
+    # send the courses to a dropdown flow
+    matching_courses.sort(key=lambda x: len(x.get_name_tokens()))
+    matching_courses_str = [x.to_json() for x in matching_courses]
+    print(type(matching_courses_str))
+    print(type(matching_courses_str[0]))
+    print(matching_courses_str[0])
+    await inter.followup.send("", view=CourseDropdownView(matching_courses_str, score))
 
-    # ERROR: No sanctioned rounds
-    if num_results == 0:
-        embeds=[disnake.Embed.from_dict({
-            "title": f"{chosen_course_name}: {score if score < 0 else '+' + str(score) if score > 0 else 'E'}",
-            "description": f"No PDGA tournaments found for '{chosen_course_name}'.\n\n*Wrong course? Click ❓*",
-            "color": 0xFF1B29,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "author": {
-                "name": "HotRound",
-                "url": "https://hotround.site",
-                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
-            },
-        })]
-        await inter.followup.send(embed=embeds[0], view=CreateOptions(embeds, similar_course_names, disable_pagination=True, author_id=inter.author.id, timeout=600))
-        return
-    
-    layout_keywords = layout_keywords.replace(' ', '').split(',')
-    aggregate_layouts.sort(key=lambda x: x.score_layout_tokens(layout_keywords), reverse=True)
-    embeds = [
-        disnake.Embed.from_dict({
-            "title": f"{score if score < 0 else '+' + str(score) if score > 0 else 'E'} is **{layout.score_rating(score)} rated**",
-            "color": 0x008E6F,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "author": {
-                "name": "HotRound",
-                "url": "https://hotround.site",
-                "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
-            },
-            "description": f"""
-                **__{chosen_course_name}__**\n*{layout.descriptive_name}*\n**{layout.total_distance}'**, par **{layout.total_par}**\n{layout_to_str(layout, num_results=3)}...\n\nCalculated from **{layout.num_layouts}** rounds\nEvents: **{COMMASPACE.join(layout.layout_links()[:5])}**\n\n*Wrong layout? Click ➡️\nWrong course? Click ❓*""",
-            "footer": {
-                "text": f"Result {i+1} of {num_results}"
-            }
-        }) 
-        for i, layout in enumerate(aggregate_layouts)]
-
-    logger.info(f"User {inter.author.name} requested ratings for {chosen_course_name} with score {score}")
-    await inter.followup.send(embed=embeds[0], view=CreateOptions(embeds, similar_course_names, author_id=inter.author.id, timeout=600)) 
+    logger.info(f"User {inter.author.name} requested ratings for {course} with score {score}")
 
 setup, teardown = plugin.create_extension_handlers()

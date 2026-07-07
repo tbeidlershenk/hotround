@@ -37,6 +37,13 @@ class Database:
             .filter_by(event_id=event_id)
             .first() is not None
         )
+    
+    def query_course(self, course_id: int) -> Course:
+        return (
+            self.session.query(Course)            
+            .filter(Course.course_id == course_id)
+            .first()
+        )
 
     def query_courses(self) -> list[Course]:
         return self.session.query(Course).all()

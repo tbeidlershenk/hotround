@@ -9,6 +9,7 @@ from scipy.cluster.hierarchy import linkage, fcluster
 from models.score import Score
 from util.helpers import to_pdgalive_link
 
+import json
 
 class Layout(Base):
     __tablename__ = "Layouts"
@@ -33,30 +34,48 @@ class Layout(Base):
 
 
 class AggregateLayout:
-    def __init__(self, rounds: list[Round]):
-        """
-        Generates an aggregate layout by averaging a list of layouts.
-        Assumes that the list is non-empty and layouts have valid data.
-        """
-        self.rounds = rounds
-        self.layouts = [x.layout for x in rounds]
-        self.scores = list(itertools.chain.from_iterable([x.scores for x in rounds]))
-        self.num_layouts = len(self.layouts)
-        self.num_rounds = len(self.layouts)
-        self.num_tournaments = len(set([x.event_id for x in rounds]))
-        self.num_holes = self.layouts[0].num_holes
-        self.distances = self.get_averaged_distances()
-        self.total_distance = int(np.mean([x.total_distance for x in self.layouts]))
-        self.pars = [int(x) for x in self.layouts[0].pars.split(", ")]
-        self.total_par = self.layouts[0].total_par
-        self.layout_names = [x.layout_name for x in self.layouts]
-        self.layout_names_and_links = self.get_layout_names_and_links()
-        self.layout_tokens = self.tokenize_layout_names()
-        self.descriptive_name = self.get_descriptive_name()
-        self.par_rating = int(np.mean([x.par_rating for x in self.rounds]))
-        self.stroke_value = int(np.mean([x.stroke_value for x in self.rounds]))
-        self.averaged_hole_scores = self.get_averaged_hole_scores()
-        self.total_score_distribution = self.get_total_score_distribution()
+    rounds: list[Round] = []
+    layouts: list[Layout] = []
+    scores: list[itertools.chain] = []
+    num_layouts: int = 0
+    num_rounds: int = 0
+    num_tournaments: int = 0
+    num_holes: int = 0
+    distances: str = ''
+    total_distance: int = 0
+    pars: list[int] = []
+    total_par: int = 0
+    layout_names: list[str] = []
+    layout_names_and_links: list[dict] = []
+    layout_tokens: list[str] = []
+    descriptive_name: str = ''
+    par_rating: int = 0
+    stroke_value: int = 0
+    averaged_hole_scores: list[float] = []
+    total_score_distribution: list[dict] = []
+
+    def from_rounds(rounds: list[Round]):
+        al = AggregateLayout()
+        al.rounds = rounds
+        al.layouts = [x.layout for x in rounds]
+        al.scores = list(itertools.chain.from_iterable([x.scores for x in rounds]))
+        al.num_layouts = len(al.layouts)
+        al.num_rounds = len(al.layouts)
+        al.num_tournaments = len(set([x.event_id for x in rounds]))
+        al.num_holes = al.layouts[0].num_holes
+        al.distances = al.get_averaged_distances()
+        al.total_distance = int(np.mean([x.total_distance for x in al.layouts]))
+        al.pars = [int(x) for x in al.layouts[0].pars.split(", ")]
+        al.total_par = al.layouts[0].total_par
+        al.layout_names = [x.layout_name for x in al.layouts]
+        al.layout_names_and_links = al.get_layout_names_and_links()
+        al.layout_tokens = al.tokenize_layout_names()
+        al.descriptive_name = al.get_descriptive_name()
+        al.par_rating = int(np.mean([x.par_rating for x in al.rounds]))
+        al.stroke_value = int(np.mean([x.stroke_value for x in al.rounds]))
+        al.averaged_hole_scores = al.get_averaged_hole_scores()
+        al.total_score_distribution = al.get_total_score_distribution()
+        return al
 
     def to_dict(self) -> dict:
         return {
@@ -77,6 +96,30 @@ class AggregateLayout:
             "averaged_hole_scores": self.averaged_hole_scores,
             "total_score_distribution": self.total_score_distribution,
         }
+    
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())
+    
+    def from_json(json_str: str):
+        dict = json.loads(json_str)
+        al = AggregateLayout()
+        al.num_layouts = dict["num_layouts"]
+        al.num_rounds = dict["num_rounds"]
+        al.num_tournaments = dict["num_tournaments"]
+        al.num_holes = dict["num_holes"]
+        al.distances = dict["distances"]
+        al.total_distance = dict["total_distance"]
+        al.pars = dict["pars"]
+        al.total_par = dict["total_par"]
+        al.layout_names = dict["layout_names"]
+        al.layout_names_and_links = dict["layout_names_and_links"]
+        al.layout_tokens = dict["layout_tokens"]
+        al.descriptive_name = dict["descriptive_name"]
+        al.par_rating = dict["par_rating"]
+        al.stroke_value = dict["stroke_value"]
+        al.averaged_hole_scores = dict["averaged_hole_scores"]
+        al.total_score_distribution = dict["total_score_distribution"]
+        return al
 
     def get_scores(self) -> list[Score]:
         scores = []
@@ -258,7 +301,7 @@ def aggregate_layouts(
             if len(group_list) == 0:
                 continue
 
-            layout = AggregateLayout(group_list)
+            layout: AggregateLayout = AggregateLayout.from_rounds(group_list)
             if layout.total_distance == 0:
                 continue
             if layout.total_par == 0:
