@@ -7,11 +7,6 @@ from models.layout import AggregateLayout
 
 MISSING_LABEL = "???"
 
-class LayoutDropdownView(disnake.ui.View):
-    def __init__(self, course_str: str, layouts_str: list[str], score: int):
-        super().__init__()
-        self.add_item(LayoutDropdown(course_str, layouts_str, score))
-
 class LayoutDropdown(disnake.ui.StringSelect):
     # state variables
     course: Course = None
@@ -19,22 +14,27 @@ class LayoutDropdown(disnake.ui.StringSelect):
     score: int = 0
     
     missing_option = disnake.SelectOption(value="-1", label="???", description="My layout is missing!")
+    default_option = disnake.SelectOption(value="placeholder", label="placeholder", description="Select a course first")
 
     # Constructs the dropdown
-    def __init__(self, course_str: str, layouts_str: list[str], score: int):
-        self.course = Course.from_json(course_str)
-        self.layouts = [AggregateLayout.from_json(l) for l in layouts_str]
-        self.score = score
-        options = [disnake.SelectOption(value=l.get_descriptive_name(), label=l.get_descriptive_name(), description=l.total_distance) for l in self.layouts]
-        options.append(self.missing_option)
-        super().__init__(placeholder="Choose an layout", min_values=1, max_values=1, options=options)
+    def __init__(self):
+        super().__init__(placeholder=f"Select a course first", options=[self.default_option], disabled=True)
 
     # Callback when user selects an option
     async def callback(self, inter: disnake.MessageInteraction):
+        view = self.view
         await inter.response.defer()
+        embed = None
+
         user_choice = self.values[0]
         if user_choice == self.missing_option.value:
-            await inter.followup.send(embed=Embeds.layout_missing())
-        else:     
-            layout: AggregateLayout = next(filter(lambda x: x.get_descriptive_name() == user_choice, self.layouts), None)
-            await inter.followup.send(embed=Embeds.success(self.course, layout, self.score))
+            embed = Embeds.layout_missing()
+        else:
+            view.selected_layout = next(l for l in self.layouts if l.get_unique_identifier() == self.values[0])
+            embed = Embeds.success(self.course, view.selected_layout, self.score)
+
+        if view.ratings_response is None:
+            view.ratings_response = await inter.followup.send(embed=embed, wait=True)
+        else:
+            await view.ratings_response.edit(embed=embed)
+            

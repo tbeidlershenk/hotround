@@ -149,6 +149,9 @@ class AggregateLayout:
         for score in set(scores):
             distribution.append({"score": score, "count": scores.count(score)})
         return distribution
+    
+    def get_unique_identifier(self) -> str:
+        return self.get_descriptive_name() + ", " + str(self.total_distance)
 
     def get_averaged_distances(self) -> list[int]:
         str_distances = [x.distances.split(", ") for x in self.layouts]
