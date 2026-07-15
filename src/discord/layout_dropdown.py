@@ -8,10 +8,7 @@ from models.layout import AggregateLayout
 MISSING_LABEL = "???"
 
 class LayoutDropdown(disnake.ui.StringSelect):
-    # state variables
-    course: Course = None
     layouts: list[AggregateLayout] = []
-    score: int = 0
     
     missing_option = disnake.SelectOption(value="-1", label="???", description="My layout is missing!")
     default_option = disnake.SelectOption(value="placeholder", label="placeholder", description="Select a course first")
@@ -30,11 +27,11 @@ class LayoutDropdown(disnake.ui.StringSelect):
         if user_choice == self.missing_option.value:
             embed = Embeds.layout_missing()
         else:
-            view.selected_layout = next(l for l in self.layouts if l.get_unique_identifier() == self.values[0])
-            embed = Embeds.success(self.course, view.selected_layout, self.score)
+            layout = next(l for l in self.layouts if l.get_unique_identifier() == self.values[0])
+            view.layout = layout
+            embed = Embeds.success(view.course, view.layout, view.score)
 
         if view.ratings_response is None:
             view.ratings_response = await inter.followup.send(embed=embed, wait=True)
         else:
             await view.ratings_response.edit(embed=embed)
-            

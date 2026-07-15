@@ -30,7 +30,6 @@ async def ratings(
     # query and match courses to search
     courses = bot.database.query_courses()
 
-    # filter out duplicates
     courses = filter_duplicates(courses)
     
     # simple token match

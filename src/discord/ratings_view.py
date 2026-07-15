@@ -7,10 +7,10 @@ class RatingsView(disnake.ui.View):
         super().__init__()
 
         self.score = score
-        self.selected_course = None
-        self.selected_layout = None
+        self.course = None
+        self.layout = None
 
-        self.course_dropdown = CourseDropdown(courses_str, score)
+        self.course_dropdown = CourseDropdown(courses_str)
         self.layout_dropdown = LayoutDropdown()
         self.ratings_response = None
 

@@ -50,4 +50,4 @@ class Course(Base):
             return self.course_text.split('\n\n')[1]
         
     def has_events(self) -> bool:
-        return events != []
+        return self.events != []
