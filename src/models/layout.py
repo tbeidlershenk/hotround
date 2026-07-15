@@ -151,7 +151,7 @@ class AggregateLayout:
         return distribution
     
     def get_unique_identifier(self) -> str:
-        return self.get_descriptive_name() + ", " + str(self.total_distance)
+        return self.get_descriptive_name() + ", " + str(self.total_distance) + ", " + str(self.total_par)
 
     def get_averaged_distances(self) -> list[int]:
         str_distances = [x.distances.split(", ") for x in self.layouts]
