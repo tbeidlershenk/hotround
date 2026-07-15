@@ -6,6 +6,8 @@ from discord.layout_dropdown import LayoutDropdown
 from bot import HotRoundBot
 from models.course import Course
 
+from discord.utils import send_message
+
 class CourseDropdown(disnake.ui.StringSelect):
     # state variables
     courses: list[Course] = []
@@ -28,16 +30,10 @@ class CourseDropdown(disnake.ui.StringSelect):
         user_choice = self.values[0]
 
         if user_choice == self.missing_option.value:
-            if view.ratings_response == None:
-                view.ratings_response = await inter.followup.send(embed=Embeds.course_missing(), wait=True)
-                view.course_dropdown.placeholder = "???"
-                view.layout_dropdown.placeholder = "???"
-                view.layout_dropdown.disabled = True
-            else:
-                await view.ratings_response.edit(embed=Embeds.course_missing())
-                view.course_dropdown.placeholder = "???"
-                view.layout_dropdown.placeholder = "???"
-                view.layout_dropdown.disabled = True
+            await send_message(inter, view, Embeds.course_missing())
+            view.course_dropdown.placeholder = "???"
+            view.layout_dropdown.placeholder = "???"
+            view.layout_dropdown.disabled = True
         else:
             # pull course with course_id
             course = next(c for c in self.courses if c.course_id == int(user_choice))
@@ -52,7 +48,7 @@ class CourseDropdown(disnake.ui.StringSelect):
 
             view.layout_dropdown.layouts = layouts
             view.layout_dropdown.disabled = False
-            view.layout_dropdown.placeholder = f"Choose a layout ({len(layouts)} options)" if len(layouts) > 1 else f"Choose a layout ({len(layouts)} option)"
+            view.layout_dropdown.placeholder = f"Choose a layout ({len(layouts)} option)" if len(layouts) == 1 else f"Choose a layout ({len(layouts)} options)"
             view.layout_dropdown.options = [disnake.SelectOption(value=l.get_unique_identifier(), label=l.get_descriptive_name(), description=f"Par {l.total_par}, {l.total_distance} ft)") for l in layouts]
             view.layout_dropdown.options.append(view.layout_dropdown.missing_option)
 

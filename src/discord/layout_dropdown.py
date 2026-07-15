@@ -5,6 +5,8 @@ from discord.embeds import Embeds
 from models.course import Course
 from models.layout import AggregateLayout
 
+from discord.utils import send_message
+
 MISSING_LABEL = "???"
 
 class LayoutDropdown(disnake.ui.StringSelect):
@@ -31,7 +33,5 @@ class LayoutDropdown(disnake.ui.StringSelect):
             view.layout = layout
             embed = Embeds.success(view.course, view.layout, view.score)
 
-        if view.ratings_response is None:
-            view.ratings_response = await inter.followup.send(embed=embed, wait=True)
-        else:
-            await view.ratings_response.edit(embed=embed)
+        await send_message(inter, view, embed)
+
