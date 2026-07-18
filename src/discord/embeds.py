@@ -18,15 +18,13 @@ def layout_to_str(layout: AggregateLayout, num_results = 3) -> str:
 
 class Embeds:
     def no_matches(searched_name: str) -> Embed:
-        description = f"""
-            HotRound did not find any courses matching the name {searched_name}.
-            
-            **Some things to try:**
-            1. Use this command with `discgolfscene_url` parameter\n2. Try **[browsing the dataset](https://hotround.tbeidlershenk.dev/courses.txt)**
-
-            If we missed your course,
-            **[submit a missing course report]({course_report_url})**
-        """
+        description = "" + \
+            f"HotRound did not find any courses matching the name {searched_name}.\n\n" + \
+            "**Some things to try:**\n" + \
+            "1. Use this command with `dgscene_url` parameter\n" + \
+            "2. Try **[browsing the dataset](https://hotround.tbeidlershenk.dev/courses.txt)**\n\n" + \
+            "If we missed your course,\n" + \
+            f"**[submit a missing course report]({course_report_url})**"
         return disnake.Embed.from_dict({
             "title": "No matches found",
             "description": description,
@@ -36,16 +34,14 @@ class Embeds:
         })
     
     def course_missing() -> Embed:
-        description = f"""
-            The HotRound database may not be complete. Courses
-            and events are updated on the **1st of each month.**
-            
-            **Some things to try:**
-            1. Use this command with `discgolfscene_url` parameter\n2. Try **[browsing the dataset](https://hotround.tbeidlershenk.dev/courses.txt)**
-
-            If we missed your course,
-            **[submit a missing course report]({course_report_url})**
-        """
+        description = "" + \
+            "The HotRound database may not be complete. Courses\n" + \
+            "and events are updated on the **1st of each month.**\n\n" + \
+            "**Some things to try:**\n" + \
+            "1. Use this command with `discgolfscene_url` parameter\n" + \
+            "2. Try **[browsing the dataset](https://hotround.tbeidlershenk.dev/courses.txt)**\n\n" + \
+            "If we missed your course,\n" + \
+            f"**[submit a missing course report]({course_report_url})**"
         return disnake.Embed.from_dict({
             "title": f"Don't see your course?",
             "description": description,
@@ -55,16 +51,13 @@ class Embeds:
         })
     
     def layout_missing() -> Embed:
-        description = f"""
-            The HotRound database may not be complete. Courses
-            and events are updated on the **1st of each month.**
-            
-            Some layouts may not have hosted tournaments.
-            If the layout is new, please try again later.
-
-            If we missed your layout,
-            **[submit a missing layout report]({layout_report_url})**
-        """
+        description = "" + \
+            "The HotRound database may not be complete. Courses\n" + \
+            "and events are updated on the **1st of each month.**\n\n" + \
+            "Some layouts may not have hosted tournaments.\n" + \
+            "If the layout is new, please try again later.\n\n" + \
+            "If we missed your layout,\n" + \
+            f"**[submit a missing layout report]({layout_report_url})**"
         return disnake.Embed.from_dict({
             "title": f"Don't see your layout?",
             "description": description,
@@ -74,15 +67,13 @@ class Embeds:
         })
 
     def success(course: Course, layout: AggregateLayout, score: int) -> Embed:
-        description = f"""
-            **__{course.get_name()}__**
-            *{layout.descriptive_name}*
-            **{layout.total_distance}'**, par **{layout.total_par}**
-            {layout_to_str(layout, num_results=3)}...
-            
-            Calculated from **{layout.num_layouts}** rounds
-            Events: **{', '.join(layout.layout_links()[:5])}**
-        """
+        description = "" + \
+            f"**__{course.get_name()}__**\n" + \
+            f"*{layout.descriptive_name}*\n" + \
+            f"**{layout.total_distance}'**, par **{layout.total_par}**\n" + \
+            f"{layout_to_str(layout, num_results=3)}...\n\n" + \
+            f"Calculated from **{layout.num_layouts}** rounds\n" + \
+            f"Events: **{', '.join(layout.layout_links()[:5])}**"
         return disnake.Embed.from_dict({
             "title": f"{score if score < 0 else '+' + str(score) if score > 0 else 'E'} is **{layout.score_rating(score)} rated**",
             "color": 0x008E6F,

@@ -42,7 +42,7 @@ class CourseDropdown(disnake.ui.StringSelect):
             # retrieve layouts for selected course
             layouts = bot.database.query_aggregate_layouts(course.course_id)
             layouts.sort(key=lambda x: x.num_rounds, reverse=True)
-            layouts = layouts[:10]
+            layouts = layouts[:24]
             layouts.sort(key=lambda x: x.total_distance, reverse=True)
 
             view.course = course
