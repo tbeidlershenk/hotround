@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base import Base
 
+import json
+
 class Round(Base):
     __tablename__ = 'Rounds'
     round_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -29,4 +31,14 @@ class Round(Base):
             "layout": self.layout.to_dict(),
             "scores": [x.to_dict() for x in self.scores]
         }
+    
+    def to_json(self) -> str:
+        return json.dumps({
+            "round_number": self.round_number,
+            "num_players": self.num_players,
+            "high_rating": self.high_rating,
+            "low_rating": self.low_rating,
+            "par_rating": self.par_rating,
+            "stroke_value": self.stroke_value,
+        })
     

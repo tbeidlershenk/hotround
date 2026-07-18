@@ -7,12 +7,12 @@ class Consts:
         //*
     """
     dgscene_course_link_xpath = """
-        //div[contains(@id, "courses-big-listing")]
-        //a[contains(@href, "/courses/") and @title]
+        //a[contains(@href, "discgolfscene.com/course")]
     """
+
     dgscene_course_name_header_xpath = '//h1[contains(@class, "header-location")]'
 
-    dgscene_course_events_url = dgscene_base_url + "/course/{course_name}"
+    dgscene_course_events_url = dgscene_base_url + "/course/{course_id}"
     pdga_event_page_base_url = "https://www.pdga.com/tour/event/"
 
     dgscene_sanctioned_event_xpath = """

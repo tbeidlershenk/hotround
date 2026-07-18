@@ -9,7 +9,6 @@ import asyncio
 from util.configuration import load_config_into_env, verify_config
 from util.database import Database
 from logger import logger
-from kaggle.api.kaggle_api_extended import KaggleApi
 
 
 class HotRoundBot(commands.InteractionBot):
@@ -26,6 +25,8 @@ async def main():
     bot = HotRoundBot()
     bot.load_extension("exts.ratings", package="exts")
     bot.load_extension("exts.status", package="exts")
+    bot.load_extension("exts.links", package="exts")
+    bot.load_extension("exts.help", package="exts")
 
     try:
         await bot.start(bot_token)
