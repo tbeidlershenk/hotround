@@ -34,13 +34,13 @@ locations = scraper.get_locations_dgscene()
 
 # 2. scrape courses for each location
 #    merge back to db, updates course details
-# for i, location in enumerate(locations):
-#     logger.info(f"{i+1}/{len(locations)} - {location}")
-#     courses = scraper.get_courses_dgscene(location)
-#     for course in courses:
-#         database.merge_data(course)
-#     logger.info(f"Courses Found - {len(courses)}")
-#     logger.info("")
+for i, location in enumerate(locations):
+    logger.info(f"{i+1}/{len(locations)} - {location}")
+    courses = scraper.get_courses_dgscene(location)
+    for course in courses:
+        database.merge_data(course)
+    logger.info(f"Courses Found - {len(courses)}")
+    logger.info("")
         
 courses = database.query_courses()
 

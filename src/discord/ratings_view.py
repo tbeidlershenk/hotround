@@ -16,3 +16,4 @@ class RatingsView(disnake.ui.View):
 
         self.add_item(self.course_dropdown)
         self.add_item(self.layout_dropdown)
+        

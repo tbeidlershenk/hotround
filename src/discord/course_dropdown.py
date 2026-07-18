@@ -17,9 +17,10 @@ class CourseDropdown(disnake.ui.StringSelect):
     # Constructs the dropdown
     def __init__(self, courses_str: list[str]):
         self.courses = [Course.from_json(c) for c in courses_str]
+        self.courses = self.courses[:24]
         options = [disnake.SelectOption(value=str(c.course_id), label=c.get_name(), description=c.get_location()) for c in self.courses]
         options.append(self.missing_option)
-        placeholder_text = f"Choose a course ({len(courses_str)} options)" if len(courses_str) > 1 else "Choose a course (1 option)"
+        placeholder_text = f"Choose a course ({len(self.courses)} options)" if len(self.courses) > 1 else "Choose a course (1 option)"
         super().__init__(placeholder=placeholder_text, min_values=1, max_values=1, options=options)
 
     # Callback when user selects an option
@@ -42,6 +43,7 @@ class CourseDropdown(disnake.ui.StringSelect):
             layouts = bot.database.query_aggregate_layouts(course.course_id)
             layouts.sort(key=lambda x: x.num_rounds, reverse=True)
             layouts = layouts[:10]
+            layouts.sort(key=lambda x: x.total_distance, reverse=True)
 
             view.course = course
             view.course_dropdown.placeholder = course.get_name()

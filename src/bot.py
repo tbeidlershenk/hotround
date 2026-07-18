@@ -25,6 +25,8 @@ async def main():
     bot = HotRoundBot()
     bot.load_extension("exts.ratings", package="exts")
     bot.load_extension("exts.status", package="exts")
+    bot.load_extension("exts.links", package="exts")
+    bot.load_extension("exts.help", package="exts")
 
     try:
         await bot.start(bot_token)

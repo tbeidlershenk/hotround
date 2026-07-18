@@ -10,6 +10,8 @@ author = {
     "url": "https://hotround.tbeidlershenk.dev",
     "icon_url": "https://uplaydiscgolf.org/cdn/shop/files/PDGA_4559f2a6-e3bc-4353-b8a7-1e7d8b2ed243.png?v=1678388512&width=1420",
 }
+course_report_url = 'https://forms.gle/uqWJSdAE3BypTSLo7'
+layout_report_url = 'https://forms.gle/jQrEgW5z45WWNQXC6'
 
 def layout_to_str(layout: AggregateLayout, num_results = 3) -> str:
     return "\n".join([f"H{x+1} • Par {layout.pars[x]} • **{layout.distances[x]}**'" for x in range(min(layout.num_holes, num_results))])
@@ -23,7 +25,7 @@ class Embeds:
             1. Use this command with `discgolfscene_url` parameter\n2. Try **[browsing the dataset](https://hotround.tbeidlershenk.dev/courses.txt)**
 
             If we missed your course,
-            **[submit a missing course report](https://forms.google.com)**
+            **[submit a missing course report]({course_report_url})**
         """
         return disnake.Embed.from_dict({
             "title": "No matches found",
@@ -34,7 +36,7 @@ class Embeds:
         })
     
     def course_missing() -> Embed:
-        description = """
+        description = f"""
             The HotRound database may not be complete. Courses
             and events are updated on the **1st of each month.**
             
@@ -42,7 +44,7 @@ class Embeds:
             1. Use this command with `discgolfscene_url` parameter\n2. Try **[browsing the dataset](https://hotround.tbeidlershenk.dev/courses.txt)**
 
             If we missed your course,
-            **[submit a missing course report](https://forms.google.com)**
+            **[submit a missing course report]({course_report_url})**
         """
         return disnake.Embed.from_dict({
             "title": f"Don't see your course?",
@@ -53,7 +55,7 @@ class Embeds:
         })
     
     def layout_missing() -> Embed:
-        description = """
+        description = f"""
             The HotRound database may not be complete. Courses
             and events are updated on the **1st of each month.**
             
@@ -61,7 +63,7 @@ class Embeds:
             If the layout is new, please try again later.
 
             If we missed your layout,
-            **[submit a missing layout report](https://forms.google.com)**
+            **[submit a missing layout report]({layout_report_url})**
         """
         return disnake.Embed.from_dict({
             "title": f"Don't see your layout?",

@@ -15,3 +15,8 @@ def try_parse_hole_data(hole_elements: list[HtmlElement], num_holes: int, defaul
     except:
         return [default for _ in range(num_holes)]
     
+def dgscene_url_to_course_id(dgscene_url: str) -> int:
+    try:
+        return int(dgscene_url.split('/course/')[1].split('/')[0])
+    except:
+        return -1
