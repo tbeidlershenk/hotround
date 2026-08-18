@@ -47,13 +47,6 @@ class Database:
 
     def query_courses(self) -> list[Course]:
         return self.session.query(Course).all()
-    
-    def query_course_with_name(self, course_name: str) -> Course:
-        return (
-            self.session.query()
-            .filter(Course.course_name == course_name)
-            .first()
-        )
 
     def query_courses_with_no_events(self) -> list[Course]:
         subquery = self.session.query(Event.course_name).distinct()

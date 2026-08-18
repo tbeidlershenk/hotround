@@ -62,7 +62,8 @@ def courses():
 @app.route("/api/rating/<course_name>", methods=["GET"])
 def rating(course_name: str):
     db = Database(os.getenv("db_connection"))
-    course = db.query_course_with_name(course_name)
+    courses = db.query_courses()
+    course = [x for x in courses if x.get_name() == course_name][0]
     aggregated_layouts = db.query_aggregate_layouts(course.course_id)
     db.close()
 
